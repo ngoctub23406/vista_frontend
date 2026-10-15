@@ -1,0 +1,121 @@
+<div
+  class="admin-layout"
+  [class.sidebar-collapsed]="isSidebarCollapsed"
+>
+  <aside class="admin-sidebar">
+    <a class="sidebar-brand" routerLink="/admin/dashboard">
+      <span class="brand-logo">V</span>
+
+      <span class="brand-text">
+        <strong>VISTA</strong>
+        <span>Cổng quản trị</span>
+      </span>
+    </a>
+
+    <div class="sidebar-section-title">
+      QUẢN TRỊ HỆ THỐNG
+    </div>
+
+    <nav class="sidebar-menu" aria-label="Menu quản trị">
+      <a
+        *ngFor="let item of menuItems"
+        class="menu-item"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        [title]="item.label"
+      >
+        <ng-icon
+          class="menu-icon"
+          [name]="item.icon"
+          [size]="'20px'"
+          strokeWidth="1.8"
+        ></ng-icon>
+
+        <span class="menu-label">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="admin-avatar">A</div>
+
+      <div class="admin-info">
+        <strong>Quản trị viên</strong>
+        <span>Admin Account</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <div class="header-left">
+        <button
+          class="sidebar-toggle"
+          type="button"
+          (click)="toggleSidebar()"
+          [attr.aria-expanded]="!isSidebarCollapsed"
+          aria-label="Thu gọn hoặc mở rộng thanh điều hướng"
+          title="Thu gọn hoặc mở rộng menu"
+        >
+          <ng-icon
+            name="lucideMenu"
+            [size]="'20px'"
+            strokeWidth="1.8"
+          ></ng-icon>
+        </button>
+
+        <div class="header-breadcrumb">
+          <span class="breadcrumb-parent">Quản trị</span>
+          <span class="breadcrumb-separator">›</span>
+          <span class="breadcrumb-current">Admin Portal</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button
+          class="notification-button"
+          type="button"
+          aria-label="Thông báo"
+          title="Thông báo"
+        >
+          <ng-icon
+            name="lucideBell"
+            [size]="'20px'"
+            strokeWidth="1.8"
+          ></ng-icon>
+
+          <span class="notification-dot"></span>
+        </button>
+
+        <button
+          class="account-button"
+          type="button"
+          title="Tài khoản quản trị"
+        >
+          <span class="header-avatar">A</span>
+
+          <span class="account-info">
+            <strong>Quản trị viên</strong>
+            <span>Quản lý hệ thống</span>
+          </span>
+
+          <ng-icon
+            class="account-chevron"
+            name="lucideChevronDown"
+            [size]="'16px'"
+            strokeWidth="1.8"
+          ></ng-icon>
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+
+    <footer class="admin-footer">
+      <span>VISTA Admin Portal</span>
+      <span>© 2026 VISTA</span>
+    </footer>
+  </div>
+</div>
