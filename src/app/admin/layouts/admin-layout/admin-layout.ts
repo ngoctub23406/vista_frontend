@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  Router,
   RouterLink,
   RouterLinkActive,
   RouterOutlet
 } from '@angular/router';
+import { clearAdminSession, getAdminRole } from '../../../guards/admin-guard';
 
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -47,8 +49,7 @@ import {
 })
 export class AdminLayoutComponent {
   isSidebarCollapsed = false;
-
-  menuItems = [
+  private readonly allMenuItems = [
     {
       label: 'Tổng quan',
       icon: 'lucideLayoutDashboard',
@@ -81,7 +82,27 @@ export class AdminLayoutComponent {
     }
   ];
 
+  menuItems = (() => {
+    const role = getAdminRole();
+    if (role === 'Manager') {
+      return this.allMenuItems;
+    }
+    if (role === 'Staff') {
+      return this.allMenuItems.filter((item) =>
+        item.route !== '/admin/dashboard' && item.route !== '/admin/staff'
+      );
+    }
+    return [];
+  })();
+
+  constructor(private router: Router) {}
+
   toggleSidebar(): void {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
+  }
+
+  logout(): void {
+    clearAdminSession();
+    this.router.navigate(['/admin/login']);
   }
 }

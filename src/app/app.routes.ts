@@ -24,15 +24,36 @@ import { CriteriaPage } from './pages/ai-compare/criteria-page/criteria-page';
 import { ResultPage } from './pages/ai-compare/result-page/result-page';
 import { HistoryPage } from './pages/ai-compare/history-page/history-page';
 import { AiAssistantComponent } from './pages/ai-assistant/ai-assistant';
+import { AdminLogin } from './admin/pages/admin-login/admin-login';
 import { AdminLayoutComponent } from './admin/layouts/admin-layout/admin-layout';
+import { AdminGuard } from './guards/admin-guard';
+import { AdminForgotPassword } from './admin/pages/admin-forgot-password/admin-forgot-password';
+import { AdminVerifyOtp } from './admin/pages/admin-verify-otp/admin-verify-otp';
+import { AdminResetPassword } from './admin/pages/admin-reset-password/admin-reset-password';
 
 export const routes: Routes = [
   // =========================
   // ADMIN
   // =========================
+  // ADMIN
+  { path: 'admin/login', component: AdminLogin },
+  {
+    path: 'admin/forgot-password',
+    component: AdminForgotPassword,
+  },
+  {
+    path: 'admin/verify-otp',
+    component: AdminVerifyOtp,
+  },
+  {
+    path: 'admin/reset-password',
+    component: AdminResetPassword,
+  },
   {
     path: 'admin',
-    component: AdminLayoutComponent
+    component: AdminLayoutComponent,
+    canActivate: [AdminGuard],
+    canActivateChild: [AdminGuard],
   },
 
   // =========================
