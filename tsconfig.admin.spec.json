@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/**/*.d.ts",
+    "src/app/admin/layouts/admin-layout/admin-layout.spec.ts",
+    "src/app/guards/admin-guard.spec.ts",
+    "src/app/admin/pages/admin-verify-otp/admin-verify-otp.spec.ts"
+  ]
+}
