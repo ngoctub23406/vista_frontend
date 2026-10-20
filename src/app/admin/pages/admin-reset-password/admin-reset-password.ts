@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { AdminPasswordResetService } from '../../services/admin-password-reset';
 
 @Component({
@@ -12,6 +13,8 @@ import { AdminPasswordResetService } from '../../services/admin-password-reset';
   styleUrl: './admin-reset-password.scss',
 })
 export class AdminResetPassword {
+  viewState: 'form' | 'loading' | 'success' = 'form';
+
   email = '';
   otpCode = '';
 
@@ -22,10 +25,12 @@ export class AdminResetPassword {
   showConfirmPassword = false;
 
   errorMessage = '';
-  successMessage = '';
-  isLoading = false;
 
-  constructor(private router: Router, private adminPasswordReset: AdminPasswordResetService) {
+  constructor(
+    private router: Router,
+    private changeDetectorRef: ChangeDetectorRef,
+    private adminPasswordReset: AdminPasswordResetService,
+  ) {
     this.email =
       this.router.getCurrentNavigation()?.extras.state?.['email']
       ?? history.state?.email
@@ -39,9 +44,7 @@ export class AdminResetPassword {
 
   onSubmit(event: Event): void {
     event.preventDefault();
-
     this.errorMessage = '';
-    this.successMessage = '';
 
     if (!this.newPassword || !this.confirmPassword) {
       this.errorMessage = 'Vui lòng nhập đầy đủ thông tin.';
@@ -63,22 +66,36 @@ export class AdminResetPassword {
       return;
     }
 
-    this.isLoading = true;
+    this.viewState = 'loading';
+
     this.adminPasswordReset
       .resetPassword({
         Email: this.email,
         otpCode: this.otpCode,
         Password: this.newPassword,
       })
+      .pipe(
+        finalize(() => {
+          if (this.viewState === 'loading') {
+            this.viewState = 'form';
+            this.changeDetectorRef.detectChanges();
+          }
+        }),
+      )
       .subscribe({
         next: (response) => {
-          this.isLoading = false;
-          this.successMessage = response.message;
+          if (response.success !== true) {
+            this.errorMessage =
+              response.message || 'Không thể đặt lại mật khẩu. Vui lòng thử lại.';
+            return;
+          }
+
+          this.viewState = 'success';
           this.newPassword = '';
           this.confirmPassword = '';
+          this.changeDetectorRef.detectChanges();
         },
         error: (error) => {
-          this.isLoading = false;
           this.errorMessage =
             error.error?.message || 'Không thể đặt lại mật khẩu. Vui lòng thử lại.';
         },

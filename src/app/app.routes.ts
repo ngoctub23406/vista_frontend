@@ -30,6 +30,8 @@ import { AdminGuard } from './guards/admin-guard';
 import { AdminForgotPassword } from './admin/pages/admin-forgot-password/admin-forgot-password';
 import { AdminVerifyOtp } from './admin/pages/admin-verify-otp/admin-verify-otp';
 import { AdminResetPassword } from './admin/pages/admin-reset-password/admin-reset-password';
+import { AdminDashboard } from './admin/pages/admin-dashboard/admin-dashboard';
+import { AdminChangePassword } from './admin/pages/admin-change-password/admin-change-password';
 
 export const routes: Routes = [
   // =========================
@@ -54,6 +56,21 @@ export const routes: Routes = [
     component: AdminLayoutComponent,
     canActivate: [AdminGuard],
     canActivateChild: [AdminGuard],
+    children: [
+      {
+        path: 'change-password',
+        component: AdminChangePassword,
+      },
+      {
+        path: 'dashboard',
+        component: AdminDashboard,
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+    ],
   },
 
   // =========================
