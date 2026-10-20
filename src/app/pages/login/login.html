@@ -35,11 +35,11 @@
         </div>
       </div>
 
-      <button type="submit" class="btn-submit" 
-              [disabled]="isLocked" 
-              [style.opacity]="isLocked ? '0.5' : '1'" 
-              [style.cursor]="isLocked ? 'not-allowed' : 'pointer'">
-        {{ isLocked ? 'Thử lại sau ' + countdown + 's' : 'Đăng nhập' }}
+      <button type="submit" class="btn-submit"
+              [disabled]="isLocked || isLoading"
+              [style.opacity]="isLocked || isLoading ? '0.5' : '1'"
+              [style.cursor]="isLocked || isLoading ? 'not-allowed' : 'pointer'">
+        {{ isLoading ? 'Đang đăng nhập...' : isLocked ? 'Thử lại sau ' + countdown + 's' : 'Đăng nhập' }}
       </button>
     </form>
 

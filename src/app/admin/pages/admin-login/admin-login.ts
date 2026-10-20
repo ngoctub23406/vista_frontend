@@ -1,9 +1,10 @@
 
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
 
 interface LoginResponse {
   success: boolean;
@@ -25,7 +26,7 @@ interface LoginResponse {
   templateUrl: './admin-login.html',
   styleUrl: './admin-login.scss',
 })
-export class AdminLogin implements OnDestroy {
+export class AdminLogin {
   showPassword = false;
   email = '';
   password = '';
@@ -33,43 +34,31 @@ export class AdminLogin implements OnDestroy {
   isLoading = false;
 
   private readonly apiUrl = 'http://localhost:5000/api/auth/login';
-  private errorTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private changeDetectorRef: ChangeDetectorRef,
+    private destroyRef: DestroyRef,
   ) {}
 
   private showError(message: string): void {
-    this.clearError();
     this.errorMessage = message;
-
-    let timer: ReturnType<typeof setTimeout>;
-    timer = setTimeout(() => {
-      if (this.errorTimer !== timer) return;
-
-      this.errorMessage = '';
-      this.errorTimer = null;
-    }, 3000);
-
-    this.errorTimer = timer;
+    this.refreshView();
   }
 
   clearError(): void {
-    if (this.errorTimer !== null) {
-      clearTimeout(this.errorTimer);
-      this.errorTimer = null;
-    }
-
     this.errorMessage = '';
-  }
-
-  ngOnDestroy(): void {
-    this.clearError();
+    this.refreshView();
   }
 
   onSubmit(event: Event): void {
     event.preventDefault();
+
+    if (this.isLoading) {
+      return;
+    }
+
     this.clearError();
 
     if (!this.email.trim() || !this.password) {
@@ -78,23 +67,27 @@ export class AdminLogin implements OnDestroy {
     }
 
     this.isLoading = true;
+    this.refreshView();
 
     this.http.post<LoginResponse>(this.apiUrl, {
       Email: this.email.trim(),
       Password: this.password,
-    }).subscribe({
+    }).pipe(
+      finalize(() => {
+        this.isLoading = false;
+        this.refreshView();
+      }),
+    ).subscribe({
       next: (response) => {
         const user = response.user;
 
         if (!response.success || !response.token || !user) {
           this.showError(response.message || 'Đăng nhập thất bại.');
-          this.isLoading = false;
           return;
         }
 
         if (user.Role !== 'Manager' && user.Role !== 'Staff') {
           this.showError('Tài khoản không có quyền truy cập Admin.');
-          this.isLoading = false;
           return;
         }
 
@@ -104,9 +97,18 @@ export class AdminLogin implements OnDestroy {
         this.router.navigate(['/admin']);
       },
       error: (error: HttpErrorResponse) => {
-        this.showError(error.error?.message || 'Không thể kết nối máy chủ.');
-        this.isLoading = false;
+        this.showError(
+          error.status === 0
+            ? 'Không thể kết nối máy chủ. Vui lòng thử lại.'
+            : error.error?.message || 'Đăng nhập thất bại. Vui lòng thử lại.',
+        );
       },
     });
+  }
+
+  private refreshView(): void {
+    if (!this.destroyRef.destroyed) {
+      this.changeDetectorRef.detectChanges();
+    }
   }
 }

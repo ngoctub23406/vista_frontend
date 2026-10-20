@@ -20,6 +20,8 @@ describe('AdminLayout', () => {
   afterEach(() => {
     localStorage.removeItem('vista_admin_token');
     localStorage.removeItem('vista_admin_user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     vi.restoreAllMocks();
   });
 
@@ -64,13 +66,76 @@ describe('AdminLayout', () => {
     expect(fixture.nativeElement.querySelectorAll('.menu-item').length).toBe(0);
   });
 
+  it('shows the signed-in Admin name, role and avatar initial', () => {
+    localStorage.setItem('vista_admin_user', JSON.stringify({
+      Full_name: 'Nguyen Thi An',
+      Username: 'an.nguyen',
+      Role: 'Staff',
+    }));
+    createComponent('Staff');
+
+    expect(fixture.nativeElement.querySelector('.admin-info strong').textContent.trim())
+      .toBe('Nguyen Thi An');
+    expect(fixture.nativeElement.querySelector('.admin-info span').textContent.trim())
+      .toBe('Staff');
+    expect(fixture.nativeElement.querySelector('.admin-avatar').textContent.trim())
+      .toBe('N');
+    expect(fixture.nativeElement.querySelector('.account-info strong').textContent.trim())
+      .toBe('Nguyen Thi An');
+    expect(fixture.nativeElement.querySelector('.account-info span').textContent.trim())
+      .toBe('Staff');
+    expect(fixture.nativeElement.querySelector('.header-avatar').textContent.trim())
+      .toBe('N');
+  });
+
+  it('opens the shared account menu from the Header without logging out', () => {
+    createComponent('Manager');
+    const logoutSpy = vi.spyOn(component, 'logout');
+
+    component.toggleAccountMenu('header');
+    fixture.detectChanges();
+
+    expect(component.isAccountMenuOpen).toBe(true);
+    expect(fixture.nativeElement.querySelector('[role="menu"]')).toBeTruthy();
+    expect(logoutSpy).not.toHaveBeenCalled();
+    expect(localStorage.getItem('vista_admin_token')).toBe('test-token');
+  });
+
+  it('opens the account menu and closes it with Escape', () => {
+    createComponent('Manager');
+
+    component.toggleAccountMenu('sidebar');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="menu"]')).toBeTruthy();
+
+    component.closeAccountMenuOnEscape();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="menu"]')).toBeNull();
+  });
+
+  it('navigates to the Admin password change page from the account menu', () => {
+    createComponent('Manager');
+
+    component.goToChangePassword();
+
+    expect(component.isAccountMenuOpen).toBe(false);
+    expect(router.navigate).toHaveBeenCalledWith(['/admin/change-password']);
+  });
+
   it('clears the Admin session and navigates to the Admin login on logout', () => {
     createComponent('Manager');
+    localStorage.setItem('token', 'customer-token');
+    localStorage.setItem('user', JSON.stringify({ Role: 'Customer' }));
 
     component.logout();
 
     expect(localStorage.getItem('vista_admin_token')).toBeNull();
     expect(localStorage.getItem('vista_admin_user')).toBeNull();
-    expect(router.navigate).toHaveBeenCalledWith(['/admin/login']);
+    expect(localStorage.getItem('token')).toBe('customer-token');
+    expect(localStorage.getItem('user')).toBe(JSON.stringify({ Role: 'Customer' }));
+    expect(router.navigate).toHaveBeenCalledWith(
+      ['/admin/login'],
+      { replaceUrl: true },
+    );
   });
 });

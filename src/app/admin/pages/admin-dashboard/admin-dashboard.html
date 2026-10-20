@@ -1,0 +1,300 @@
+<section class="dashboard">
+  <!-- Page heading -->
+  <div class="page-heading">
+    <div>
+      <h1>Tổng quan</h1>
+      <p>Theo dõi tình hình kinh doanh và hành vi khách hàng trên VISTA.</p>
+    </div>
+
+    <div class="heading-actions">
+      <button class="btn btn-outline" type="button">
+        <ng-icon name="lucideCalendarDays" size="18px"></ng-icon>
+        <span>30 ngày gần nhất</span>
+        <ng-icon name="lucideChevronDown" size="15px"></ng-icon>
+      </button>
+
+      <button class="btn btn-primary" type="button">
+        <ng-icon name="lucideDownload" size="18px"></ng-icon>
+        <span>Xuất báo cáo</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Business KPI cards -->
+  <section class="section">
+    <h2 class="section-title">Tình hình kinh doanh</h2>
+
+    <div class="stats-grid">
+      <article class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Tổng doanh thu</span>
+          <span class="stat-icon blue">
+            <ng-icon name="lucideTrendingUp" size="21px"></ng-icon>
+          </span>
+        </div>
+        <strong class="stat-value">128.500.000 ₫</strong>
+        <span class="stat-note">Chưa kết nối dữ liệu thực tế</span>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Tổng đơn hàng</span>
+          <span class="stat-icon purple">
+            <ng-icon name="lucideShoppingBag" size="21px"></ng-icon>
+          </span>
+        </div>
+        <strong class="stat-value">1.248</strong>
+        <span class="stat-note">Chưa kết nối dữ liệu thực tế</span>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Sản phẩm</span>
+          <span class="stat-icon orange">
+            <ng-icon name="lucidePackage" size="21px"></ng-icon>
+          </span>
+        </div>
+        <strong class="stat-value">356</strong>
+        <span class="stat-note">Chưa kết nối dữ liệu thực tế</span>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Khách hàng</span>
+          <span class="stat-icon green">
+            <ng-icon name="lucideUsers" size="21px"></ng-icon>
+          </span>
+        </div>
+        <strong class="stat-value">2.845</strong>
+        <span class="stat-note">Chưa kết nối dữ liệu thực tế</span>
+      </article>
+    </div>
+  </section>
+
+  <!-- Charts -->
+  <section class="charts-grid">
+    <article class="panel revenue-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Doanh thu theo thời gian</h2>
+          <p>Biểu đồ minh họa, chưa kết nối dữ liệu thực tế</p>
+        </div>
+
+        <span class="panel-badge">Dữ liệu demo</span>
+      </div>
+
+      <div class="chart-toolbar">
+        <label for="revenue-period">Khoảng thời gian</label>
+
+        <select
+          id="revenue-period"
+          class="period-select"
+          [value]="selectedPeriod"
+          (change)="onPeriodChange($event)"
+        >
+          <option value="7days">7 ngày gần nhất</option>
+          <option value="30days">30 ngày gần nhất</option>
+          <option value="12months">12 tháng gần nhất</option>
+        </select>
+      </div>
+
+      <div class="chart-summary">
+        <div>
+          <span class="summary-label">Doanh thu</span>
+          <strong>Chưa có dữ liệu thật</strong>
+        </div>
+        <span class="demo-indicator">
+          <span></span>
+          Minh họa
+        </span>
+      </div>
+
+      <div class="revenue-chart">
+        <div class="chart-y-labels" aria-hidden="true">
+          <span>100%</span>
+          <span>75%</span>
+          <span>50%</span>
+          <span>25%</span>
+          <span>0%</span>
+        </div>
+
+        <div class="chart-plot">
+          <div class="chart-grid-lines" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <svg
+            class="revenue-svg"
+            viewBox="0 0 600 200"
+            preserveAspectRatio="none"
+            role="img"
+            [attr.aria-label]="'Biểu đồ doanh thu minh họa: ' + periodLabel"
+          >
+            <defs>
+              <linearGradient
+                id="revenue-fill"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop offset="0%" stop-color="#2563eb" stop-opacity="0.22" />
+                <stop offset="100%" stop-color="#2563eb" stop-opacity="0.01" />
+              </linearGradient>
+            </defs>
+
+            <path [attr.d]="revenueArea" fill="url(#revenue-fill)" />
+
+            <path
+              [attr.d]="revenueLine"
+              fill="none"
+              stroke="#2563eb"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              vector-effect="non-scaling-stroke"
+            />
+
+            <circle
+              *ngFor="let point of revenuePoints"
+              [attr.cx]="point.x"
+              [attr.cy]="point.y"
+              r="4"
+              fill="#ffffff"
+              stroke="#2563eb"
+              stroke-width="2"
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
+
+          <div class="chart-x-labels">
+            <span *ngFor="let label of revenueLabels">{{ label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="chart-footnote">
+        Đường biểu đồ chỉ minh họa cách hiển thị. Không dùng các giá trị này
+        làm số liệu báo cáo kinh doanh.
+      </p>
+    </article>
+
+    <article class="panel orders-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Trạng thái đơn hàng</h2>
+          <p>Tổng hợp tình trạng xử lý</p>
+        </div>
+      </div>
+
+      <div class="order-status-empty">
+        <ng-icon name="lucideShoppingBag" size="28px"></ng-icon>
+        <strong>Chưa có dữ liệu đơn hàng</strong>
+        <p>Số lượng sẽ hiển thị khi kết nối API thống kê.</p>
+      </div>
+
+      <div class="status-list">
+        <div class="status-row" *ngFor="let status of orderStatuses">
+          <span class="status-dot" [ngClass]="status.className"></span>
+          <span>{{ status.label }}</span>
+          <strong>—</strong>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Customer behavior -->
+  <section class="section">
+    <div class="section-heading">
+      <div>
+        <h2 class="section-title">Hành vi khách hàng</h2>
+        <p class="section-description">
+          Các chỉ số hỗ trợ phân tích mức độ quan tâm và nhu cầu mua sắm.
+        </p>
+      </div>
+      <span class="panel-badge">Chờ tích hợp dữ liệu</span>
+    </div>
+
+    <div class="stats-grid behavior-grid">
+      <article class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Lượt xem sản phẩm</span>
+          <span class="stat-icon blue">
+            <ng-icon name="lucideEye" size="21px"></ng-icon>
+          </span>
+        </div>
+        <strong class="stat-value">—</strong>
+        <span class="stat-note">Cần ghi nhận sự kiện xem sản phẩm</span>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Lượt tìm kiếm</span>
+          <span class="stat-icon purple">
+            <ng-icon name="lucideSearch" size="21px"></ng-icon>
+          </span>
+        </div>
+        <strong class="stat-value">—</strong>
+        <span class="stat-note">Cần tích hợp dữ liệu tìm kiếm</span>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Lượt nhấp gợi ý</span>
+          <span class="stat-icon orange">
+            <ng-icon name="lucideMousePointerClick" size="21px"></ng-icon>
+          </span>
+        </div>
+        <strong class="stat-value">—</strong>
+        <span class="stat-note">Cần ghi nhận tương tác với gợi ý</span>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Lượt thêm giỏ hàng</span>
+          <span class="stat-icon green">
+            <ng-icon name="lucideShoppingCart" size="21px"></ng-icon>
+          </span>
+        </div>
+        <strong class="stat-value">—</strong>
+        <span class="stat-note">Cần tích hợp sự kiện giỏ hàng</span>
+      </article>
+    </div>
+  </section>
+
+  <!-- Recent orders -->
+  <section class="panel recent-orders">
+    <div class="panel-heading">
+      <div>
+        <h2>Đơn hàng gần đây</h2>
+        <p>Theo dõi những đơn hàng mới phát sinh</p>
+      </div>
+      <a class="text-link" routerLink="/admin/orders">Xem tất cả</a>
+    </div>
+
+    <div class="empty-state">
+      <ng-icon name="lucideShoppingBag" size="30px"></ng-icon>
+      <strong>Chưa có dữ liệu đơn hàng</strong>
+      <p>Bảng sẽ hiển thị khi được kết nối với API.</p>
+    </div>
+  </section>
+
+  <!-- Recent activity -->
+  <section class="panel recent-activity">
+    <div class="panel-heading">
+      <div>
+        <h2>Hoạt động gần đây</h2>
+        <p>Các cập nhật liên quan đến đơn hàng</p>
+      </div>
+    </div>
+
+    <div class="activity-placeholder">
+      <ng-icon name="lucideClock" size="20px"></ng-icon>
+      <span>Chưa có dữ liệu hoạt động để hiển thị.</span>
+    </div>
+  </section>
+</section>
