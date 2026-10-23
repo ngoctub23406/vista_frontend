@@ -7,11 +7,12 @@ import { AuthService } from '../../services/auth';
 import { CartStateService } from '../../services/cart-state.service';
 import { CartService } from '../../services/cart';
 import { ProductService } from '../../services/product';
+import { NotificationBellComponent } from '../notification-bell/notification-bell';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink,RouterLinkActive, CommonModule, FormsModule], 
+  imports: [RouterLink,RouterLinkActive, CommonModule, FormsModule, NotificationBellComponent], 
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss'
 })
@@ -20,6 +21,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   searchQuery: string = ''; 
   userName: string = ''; 
   cartCount = 0;
+  customerToken: string | null = null;
   categories: any[] = [];
   private subscriptions = new Subscription();
 
@@ -37,6 +39,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(this.authService.currentUser$.subscribe(user => {
       this.isLoggedIn = !!user; 
+      this.customerToken = user ? this.authService.getToken() : null;
       
       if (user) {
         this.userName = user.Full_name || 'Khách hàng'; 

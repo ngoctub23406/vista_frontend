@@ -1,0 +1,61 @@
+<div class="bell" [class.bell--dark]="variant === 'dark'">
+  <button
+    class="bell-button"
+    type="button"
+    aria-haspopup="true"
+    [attr.aria-expanded]="isOpen"
+    [attr.aria-label]="unreadCount ? 'Thông báo, ' + unreadCount + ' chưa đọc' : 'Thông báo'"
+    title="Thông báo"
+    (click)="toggle()"
+  >
+    <svg class="bell-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
+    <span class="bell-badge" *ngIf="unreadCount > 0">{{ badgeText }}</span>
+  </button>
+
+  <div class="panel" *ngIf="isOpen" role="dialog" aria-label="Danh sách thông báo">
+    <div class="panel-header">
+      <strong>Thông báo</strong>
+      <button
+        class="panel-link"
+        type="button"
+        [disabled]="unreadCount === 0"
+        (click)="markAllAsRead()"
+      >
+        Đánh dấu đã đọc tất cả
+      </button>
+    </div>
+
+    <ul class="panel-list" *ngIf="items.length; else emptyState">
+      <li *ngFor="let item of items; trackBy: trackById">
+        <button
+          class="panel-item"
+          type="button"
+          [class.panel-item--unread]="!item.isRead"
+          (click)="open(item)"
+        >
+          <span class="item-dot" aria-hidden="true"></span>
+          <span class="item-body">
+            <span class="item-title">{{ item.title }}</span>
+            <span class="item-message">{{ item.message }}</span>
+            <span class="item-time">{{ timeAgo(item.createdAt) }}</span>
+          </span>
+        </button>
+      </li>
+    </ul>
+
+    <ng-template #emptyState>
+      <div class="panel-empty">Chưa có thông báo nào</div>
+    </ng-template>
+  </div>
+</div>
+
+<div class="toast" *ngIf="toast" role="status" aria-live="polite">
+  <button class="toast-body" type="button" (click)="open(toast)">
+    <span class="toast-title">{{ toast.title }}</span>
+    <span class="toast-message">{{ toast.message }}</span>
+  </button>
+  <button class="toast-close" type="button" aria-label="Đóng thông báo" (click)="hideToast()">×</button>
+</div>

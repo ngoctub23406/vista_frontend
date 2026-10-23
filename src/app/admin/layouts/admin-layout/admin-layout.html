@@ -124,20 +124,10 @@
       </div>
 
       <div class="header-actions">
-        <button
-          class="notification-button"
-          type="button"
-          aria-label="Thông báo"
-          title="Thông báo"
-        >
-          <ng-icon
-            name="lucideBell"
-            [size]="'20px'"
-            strokeWidth="1.8"
-          ></ng-icon>
-
-          <span class="notification-dot"></span>
-        </button>
+        <app-notification-bell
+          [token]="adminToken"
+          variant="light"
+        ></app-notification-bell>
 
         <button
           class="account-button"

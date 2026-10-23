@@ -7,6 +7,7 @@ import {
   RouterOutlet
 } from '@angular/router';
 import { clearAdminSession, getAdminRole } from '../../../guards/admin-guard';
+import { NotificationBellComponent } from '../../../components/notification-bell/notification-bell';
 
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -31,7 +32,8 @@ import {
     RouterLink,
     RouterLinkActive,
     RouterOutlet,
-    NgIcon
+    NgIcon,
+    NotificationBellComponent
   ],
   providers: [
     provideIcons({
@@ -58,6 +60,7 @@ export class AdminLayoutComponent {
   accountName = 'Quản trị viên';
   accountRole = 'Tài khoản Admin';
   accountInitial = 'Q';
+  readonly adminToken = localStorage.getItem('vista_admin_token');
 
   @ViewChild('sidebarAccount')
   private sidebarAccount?: ElementRef<HTMLElement>;
