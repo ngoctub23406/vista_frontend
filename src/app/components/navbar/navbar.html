@@ -45,6 +45,12 @@
     </div>
 
     <div class="nav-right">
+      <app-notification-bell
+        *ngIf="isLoggedIn"
+        [token]="customerToken"
+        variant="dark"
+      ></app-notification-bell>
+
       <a routerLink="/cart" class="action-btn cart-action">
         <span class="cart-icon-wrap">
           <i class="ph ph-shopping-cart"></i>

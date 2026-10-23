@@ -8,6 +8,8 @@ import { NotificationService } from '../../components/notification/notification.
 import Swal from 'sweetalert2';
 
 import { AuthService } from '../../services/auth';
+import { OrderRealtimeService } from '../../services/order-realtime.service';
+import { Subscription, debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-order-history',
@@ -71,7 +73,7 @@ export class OrderHistory implements OnInit, OnDestroy {
     { label: 'Chờ thanh toán', value: 'pending_payment' },
     { label: 'Đang xử lý', value: 'processing' },
     { label: 'Đang giao', value: 'shipping' },
-    { label: 'Đánh giá', value: 'review' },
+    { label: 'Đã nhận hàng', value: 'review' },
     { label: 'Hoàn hàng', value: 'returning' },
     { label: 'Đã hủy', value: 'cancelled' }
   ];
@@ -83,8 +85,11 @@ export class OrderHistory implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
-    private authService: AuthService
+    private authService: AuthService,
+    private orderRealtime: OrderRealtimeService
   ) {}
+
+  private realtimeSubscription?: Subscription;
 
   ngOnInit() {
     const requestedStatus = this.route.snapshot.queryParamMap.get('status') || history.state?.status || 'all';
@@ -93,18 +98,26 @@ export class OrderHistory implements OnInit, OnDestroy {
     }
 
     this.loadOrders();
+
+    // Cửa hàng / ĐVVC cập nhật đơn → tải lại lịch sử đơn hàng ngầm
+    this.realtimeSubscription = this.orderRealtime.orderUpdated$
+      .pipe(debounceTime(400))
+      .subscribe(() => this.loadOrders(true));
   }
 
   ngOnDestroy(): void {
+    this.realtimeSubscription?.unsubscribe();
     this.clearStatusTimers();
     this.stopPaymentTimer();
     this.stopPaymentStatusPolling();
   }
 
-  loadOrders() {
+  loadOrders(silent = false) {
     this.clearStatusTimers();
-    this.isLoading = true;
-    this.loadError = '';
+    if (!silent) {
+      this.isLoading = true;
+      this.loadError = '';
+    }
     this.orderHistoryService.getOrderHistory('all').subscribe({
       next: (res) => {
         if (res.success) {
@@ -131,6 +144,8 @@ export class OrderHistory implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Lỗi tải đơn hàng', err);
+        // Tải lại ngầm bị lỗi thì giữ nguyên dữ liệu đang hiển thị
+        if (silent) return;
         this.orders = [];
         this.applyFilters();
         this.loadError = err?.error?.message || 'Không thể tải lịch sử đơn hàng. Vui lòng thử lại sau.';
@@ -237,8 +252,9 @@ export class OrderHistory implements OnInit, OnDestroy {
   getStatusLabel(order: any): string {
     const status = this.normalizeStatus(order.Status);
 
+    // Tab "Đã nhận hàng": đơn giao thành công, tách theo trạng thái đánh giá
     if (status === 'review' || status === 'delivered') {
-      return this.isReviewedOrder(order) ? 'Đã được đánh giá' : 'Chưa đánh giá';
+      return this.isReviewedOrder(order) ? 'Đã đánh giá' : 'Đã nhận hàng';
     }
 
     const tab = this.tabs.find(t => t?.value === status);
@@ -526,7 +542,14 @@ export class OrderHistory implements OnInit, OnDestroy {
   closeOrderDetail(): void { this.selectedOrder = null; }
 
   canCancelOrder(order: any): boolean {
-    return ['pending_payment', 'processing'].includes(this.normalizeStatus(order?.Status));
+    // Không cho hủy khi cửa hàng đã xác nhận đơn
+    return ['pending_payment', 'processing'].includes(this.normalizeStatus(order?.Status))
+      && !order?.Is_confirmed;
+  }
+
+  // Chỉ xác nhận đã nhận hàng sau khi đơn vị vận chuyển báo đã giao
+  canMarkReceived(order: any): boolean {
+    return this.isShippingOrder(order) && order?.Delivery_status === 'delivered';
   }
 
   getCancelReason(order: any): string {
@@ -891,7 +914,7 @@ export class OrderHistory implements OnInit, OnDestroy {
 
   markOrderReceived(order: any): void {
     const orderId = order?.Order_code;
-    if (!orderId || !this.isShippingOrder(order)) {
+    if (!orderId || !this.canMarkReceived(order)) {
       return;
     }
 

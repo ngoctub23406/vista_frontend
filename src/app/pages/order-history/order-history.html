@@ -58,7 +58,8 @@
                 'status-pending-payment': order.Status === 'pending_payment',
                 'status-processing': order.Status === 'processing',
                 'status-shipping': isShippingOrder(order),
-                'status-review': isReviewOrder(order),
+                'status-review': isReviewOrder(order) && !isReviewedOrder(order),
+                'status-reviewed': isReviewOrder(order) && isReviewedOrder(order),
                 'status-returning': order.Status === 'returning',
                 'status-cancelled': order.Status === 'cancelled',
               }"
@@ -142,8 +143,13 @@
                 type="button"
                 (click)="handleReviewNow(order)"
               >
-                Đánh giá ngay
+                Đánh giá sản phẩm
               </button>
+
+              <span class="reviewed-tag" *ngIf="isReviewOrder(order) && isReviewedOrder(order)">
+                <i class="ph ph-check-circle"></i>
+                Đã đánh giá
+              </span>
 
               <button
                 *ngIf="isReviewOrder(order) && !isReviewedOrder(order)"
@@ -167,6 +173,8 @@
                 *ngIf="isShippingOrder(order)"
                 class="btn-outline"
                 type="button"
+                [disabled]="!canMarkReceived(order)"
+                [title]="canMarkReceived(order) ? '' : 'Chờ đơn vị vận chuyển xác nhận đã giao hàng'"
                 (click)="markOrderReceived(order)"
               >
                 Đã nhận được hàng
@@ -418,6 +426,8 @@
         *ngIf="isShippingOrder(detailOrder)"
         type="button"
         class="btn-outline"
+        [disabled]="!canMarkReceived(detailOrder)"
+        [title]="canMarkReceived(detailOrder) ? '' : 'Chờ đơn vị vận chuyển xác nhận đã giao hàng'"
         (click)="markOrderReceived(detailOrder)"
       >
         Đã nhận được hàng

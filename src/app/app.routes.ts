@@ -32,6 +32,7 @@ import { AdminVerifyOtp } from './admin/pages/admin-verify-otp/admin-verify-otp'
 import { AdminResetPassword } from './admin/pages/admin-reset-password/admin-reset-password';
 import { AdminDashboard } from './admin/pages/admin-dashboard/admin-dashboard';
 import { AdminChangePassword } from './admin/pages/admin-change-password/admin-change-password';
+import { AdminOrders } from './admin/pages/admin-orders/admin-orders';
 
 export const routes: Routes = [
   // =========================
@@ -64,6 +65,10 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: AdminDashboard,
+      },
+      {
+        path: 'orders',
+        component: AdminOrders,
       },
       {
         path: '',

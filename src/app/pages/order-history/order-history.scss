@@ -218,6 +218,30 @@ $white: #FFFFFF;
   color: $white;
 }
 
+// Đơn đã nhận hàng và đã đánh giá
+.status-reviewed {
+  background: #16a34a;
+  color: $white;
+}
+
+.reviewed-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #16a34a;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  i {
+    font-size: 16px;
+  }
+}
+
 .product-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -360,6 +384,12 @@ $white: #FFFFFF;
   &:hover {
     background: #EFF6FF;
     transform: translateY(-1px);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: $white;
+    transform: none;
   }
 }
 
