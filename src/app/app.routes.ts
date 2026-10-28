@@ -33,6 +33,8 @@ import { AdminResetPassword } from './admin/pages/admin-reset-password/admin-res
 import { AdminDashboard } from './admin/pages/admin-dashboard/admin-dashboard';
 import { AdminChangePassword } from './admin/pages/admin-change-password/admin-change-password';
 import { AdminOrders } from './admin/pages/admin-orders/admin-orders';
+import { AdminStaff } from './admin/pages/admin-staff/admin-staff';
+import { adminManagerGuard } from './guards/admin-manager-guard';
 
 export const routes: Routes = [
   // =========================
@@ -69,6 +71,11 @@ export const routes: Routes = [
       {
         path: 'orders',
         component: AdminOrders,
+      },
+      {
+        path: 'staff',
+        component: AdminStaff,
+        canActivate: [adminManagerGuard],
       },
       {
         path: '',
