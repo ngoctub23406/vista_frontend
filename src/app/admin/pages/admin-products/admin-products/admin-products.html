@@ -1,0 +1,1327 @@
+<section class="products-page">
+  <header class="page-heading">
+    <div>
+      <h1>Danh mục sản phẩm</h1>
+      <p>Quản lý và theo dõi danh sách sản phẩm trong hệ thống.</p>
+    </div>
+
+    <div class="heading-actions">
+      <button
+        *ngIf="canCreateProduct"
+        type="button"
+        class="btn btn-secondary btn-bulk-import-trigger"
+        (click)="openBulkImportModal()"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Nhập hàng loạt</span>
+      </button>
+
+      <button
+        *ngIf="canCreateProduct"
+        type="button"
+        class="btn btn-primary"
+        (click)="addProduct()"
+      >
+        <span aria-hidden="true">＋</span>
+        <span>Thêm sản phẩm</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Danh sách sản phẩm</h2>
+        <p class="muted">
+          Tổng cộng {{ total | number }} sản phẩm
+        </p>
+      </div>
+    </div>
+
+    <form class="filters" (ngSubmit)="search()">
+      <label class="search-box">
+        <span class="field-label">Tìm kiếm</span>
+
+        <span class="input-with-icon">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+
+          <input
+            type="search"
+            name="keyword"
+            [(ngModel)]="keyword"
+            (ngModelChange)="onKeywordChange($event)"
+            placeholder="Nhập tên hoặc mã sản phẩm..."
+            aria-label="Tìm kiếm sản phẩm"
+          />
+        </span>
+      </label>
+
+      <label class="filter-field">
+        <span class="field-label">Danh mục</span>
+
+        <select
+          name="category"
+          [(ngModel)]="selectedCategory"
+          (ngModelChange)="onFiltersChanged()"
+          [disabled]="isLoadingCategories"
+        >
+          <option value="">Tất cả danh mục</option>
+
+          <option
+            *ngFor="let category of categories"
+            [value]="category.Category_id"
+          >
+            {{ category.Category_name }}
+          </option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span class="field-label">Trạng thái</span>
+
+        <select
+          name="status"
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="onFiltersChanged()"
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value="on_sale">Đang bán</option>
+          <option value="out_of_stock">Hết hàng</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span class="field-label">Flash Sale</span>
+
+        <select
+          name="flashSale"
+          [(ngModel)]="flashSaleFilter"
+          (ngModelChange)="onFiltersChanged()"
+        >
+          <option value="">Tất cả</option>
+          <option value="true">Có</option>
+          <option value="false">Không</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span class="field-label">AI</span>
+
+        <select
+          name="ai"
+          [(ngModel)]="aiFilter"
+          (ngModelChange)="onFiltersChanged()"
+        >
+          <option value="">Tất cả</option>
+          <option value="true">Có</option>
+          <option value="false">Không</option>
+        </select>
+      </label>
+
+      <div class="filter-actions">
+        <button
+          *ngIf="hasActiveFilters"
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetFilters()"
+          aria-label="Xóa tất cả bộ lọc"
+          title="Xóa tất cả bộ lọc"
+        >
+          Xóa lọc
+        </button>
+      </div>
+    </form>
+
+    <p *ngIf="categoryError" class="inline-warning" role="status">
+      {{ categoryError }}
+    </p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="product-column">Sản phẩm</th>
+            <th>Mã SKU</th>
+            <th>Danh mục</th>
+            <th>Giá bán</th>
+            <th>Tồn kho</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+
+        <tbody *ngIf="!isLoading && !errorMessage && products.length > 0">
+          <tr
+            *ngFor="let product of products; trackBy: trackByProductId"
+          >
+            <td>
+              <div class="product-cell">
+                <div class="product-image">
+                  <img
+                    *ngIf="getProductImageUrl(product) as imageUrl"
+                    [src]="imageUrl"
+                    [alt]="product.Product_name"
+                    loading="lazy"
+                    (error)="onProductImageError(product)"
+                  />
+
+                  <span
+                    *ngIf="!getProductImageUrl(product)"
+                    class="image-placeholder"
+                    aria-label="Không có ảnh"
+                  >
+                    📦
+                  </span>
+                </div>
+
+                <div class="product-info">
+                  <span class="product-name">
+                    {{ product.Product_name }}
+                  </span>
+
+                  <span class="product-id">
+                    {{ product.Product_id }}
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <td class="sku-cell">
+              {{ getProductSku(product) }}
+            </td>
+
+            <td>
+              {{ product.category?.Category_name || '—' }}
+            </td>
+
+            <td class="price-cell">
+              {{ getProductPriceRange(product) }}
+            </td>
+
+            <td>
+              <span
+                class="stock-value"
+                [class.stock-empty]="getProductStock(product) === 0"
+              >
+                {{ getProductStock(product) | number }}
+              </span>
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="product.Status === 'on_sale'"
+                [class.status-empty]="product.Status === 'out_of_stock'"
+              >
+                <span class="status-dot"></span>
+                {{ getProductStatusLabel(product.Status) }}
+              </span>
+            </td>
+
+            <td class="actions-cell">
+              <button
+                type="button"
+                class="action-button view-button"
+                (click)="viewProduct(product)"
+                [attr.aria-label]="'Xem sản phẩm ' + product.Product_name"
+              >
+                Xem
+              </button>
+              <button
+                *ngIf="canManageProduct"
+                type="button"
+                class="action-button edit-button"
+                (click)="editProduct(product)"
+                [attr.aria-label]="'Chỉnh sửa sản phẩm ' + product.Product_name"
+              >
+                Sửa
+              </button>
+              <button
+                *ngIf="canManageProduct"
+                type="button"
+                class="action-button delete-button"
+                (click)="openDeleteConfirm(product)"
+                [attr.aria-label]="'Xóa sản phẩm ' + product.Product_name"
+              >
+                Xóa
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="isLoading" class="table-state" role="status">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <p>Đang tải danh sách sản phẩm...</p>
+      </div>
+
+      <div *ngIf="!isLoading && errorMessage" class="table-state error-state">
+        <span class="state-icon" aria-hidden="true">!</span>
+        <h3>Không thể tải dữ liệu</h3>
+        <p>{{ errorMessage }}</p>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="loadProducts()"
+        >
+          Thử lại
+        </button>
+      </div>
+
+      <div
+        *ngIf="!isLoading && !errorMessage && products.length === 0"
+        class="table-state"
+      >
+        <span class="state-icon" aria-hidden="true">⌕</span>
+        <h3>Chưa có sản phẩm</h3>
+        <p>
+          Không tìm thấy sản phẩm phù hợp với điều kiện tìm kiếm hiện tại.
+        </p>
+
+      </div>
+    </div>
+
+    <footer class="table-footer">
+      <div class="pagination-summary">
+        Hiển thị
+        <strong>{{ firstItemIndex }}</strong>–<strong>{{ lastItemIndex }}</strong>
+        trong tổng số <strong>{{ total }}</strong> sản phẩm
+      </div>
+
+      <div class="pagination-controls">
+        <label class="page-size">
+          <span>Số dòng:</span>
+
+          <select
+            name="pageSize"
+            [(ngModel)]="limit"
+            (ngModelChange)="changePageSize()"
+          >
+            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
+              {{ size }}
+            </option>
+          </select>
+        </label>
+
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="page <= 1 || isLoading"
+          (click)="changePage(page - 1)"
+          aria-label="Trang trước"
+        >
+          ‹
+        </button>
+
+        <span class="current-page">
+          {{ page }} / {{ totalPages }}
+        </span>
+
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="page >= totalPages || isLoading"
+          (click)="changePage(page + 1)"
+          aria-label="Trang sau"
+        >
+          ›
+        </button>
+      </div>
+    </footer>
+  </section>
+</section>
+
+<div
+  class="product-drawer-backdrop"
+  *ngIf="isDetailOpen"
+  (click)="closeProductDetail()"
+>
+  <aside
+    class="product-drawer"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="
+      detail ? 'Chi tiết sản phẩm ' + detail.Product_name : 'Chi tiết sản phẩm'
+    "
+    (click)="$event.stopPropagation()"
+  >
+    <header class="product-drawer-header">
+      <div>
+        <h2>Chi tiết sản phẩm</h2>
+        <p>{{ detail?.Product_id || detailProductId }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="drawer-close-button"
+        (click)="closeProductDetail()"
+        aria-label="Đóng chi tiết sản phẩm"
+      >
+        ×
+      </button>
+    </header>
+
+    <div class="product-drawer-body">
+      <div
+        class="product-drawer-state"
+        *ngIf="isDetailLoading"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <p>Đang tải chi tiết sản phẩm...</p>
+      </div>
+
+      <div
+        class="product-drawer-state product-drawer-error"
+        *ngIf="!isDetailLoading && detailError"
+        role="alert"
+      >
+        <span class="state-icon" aria-hidden="true">!</span>
+        <h3>Không thể tải chi tiết sản phẩm</h3>
+        <p>{{ detailError }}</p>
+      </div>
+
+      <ng-container *ngIf="!isDetailLoading && detail as productDetail">
+        <section class="product-detail-overview">
+          <div class="product-detail-image">
+            <img
+              *ngIf="getProductImageUrl(productDetail) as imageUrl"
+              [src]="imageUrl"
+              [alt]="productDetail.Product_name"
+              (error)="onProductImageError(productDetail)"
+            />
+            <span
+              *ngIf="!getProductImageUrl(productDetail)"
+              class="image-placeholder"
+              aria-label="Không có ảnh sản phẩm"
+            >
+              📦
+            </span>
+          </div>
+
+          <div class="product-detail-title">
+            <span class="product-detail-id">{{ productDetail.Product_id }}</span>
+            <h3>{{ productDetail.Product_name }}</h3>
+            <span
+              class="status-badge"
+              [class.status-active]="productDetail.Status === 'on_sale'"
+              [class.status-empty]="productDetail.Status === 'out_of_stock'"
+            >
+              <span class="status-dot"></span>
+              {{ getProductStatusLabel(productDetail.Status) }}
+            </span>
+          </div>
+        </section>
+
+        <section class="product-detail-section">
+          <h3>Thông tin sản phẩm</h3>
+          <dl class="product-detail-grid">
+            <div>
+              <dt>Danh mục</dt>
+              <dd>{{ productDetail.category?.Category_name || 'Chưa có danh mục' }}</dd>
+            </div>
+            <div>
+              <dt>Thương hiệu</dt>
+              <dd>{{ productDetail.brand?.Brand_name || 'Chưa có thương hiệu' }}</dd>
+            </div>
+            <div>
+              <dt>Giảm giá</dt>
+              <dd>
+                {{
+                  productDetail.Discount !== undefined
+                    ? productDetail.Discount + '%'
+                    : 'Chưa có dữ liệu'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>Flash Sale</dt>
+              <dd>
+                {{
+                  productDetail.Is_Flash_Sale === undefined
+                    ? 'Chưa có dữ liệu'
+                    : productDetail.Is_Flash_Sale
+                      ? 'Có'
+                      : 'Không'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>AI</dt>
+              <dd>
+                {{
+                  productDetail.Is_AI === undefined
+                    ? 'Chưa có dữ liệu'
+                    : productDetail.Is_AI
+                      ? 'Có'
+                      : 'Không'
+                }}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="product-detail-section">
+          <h3>Mô tả</h3>
+          <p class="product-detail-description">
+            {{ productDetail.Description || 'Chưa có mô tả.' }}
+          </p>
+        </section>
+
+        <section class="product-detail-section">
+          <h3>Thông số kỹ thuật</h3>
+          <dl
+            class="product-spec-list"
+            *ngIf="getTechnicalSpecEntries(productDetail.Technical_specs) as specs"
+          >
+            <ng-container *ngIf="specs.length > 0; else noTechnicalSpecs">
+              <div *ngFor="let spec of specs">
+                <dt>{{ spec.label }}</dt>
+                <dd>{{ spec.value }}</dd>
+              </div>
+            </ng-container>
+          </dl>
+          <ng-template #noTechnicalSpecs>
+            <p class="product-detail-empty">Chưa có thông số kỹ thuật.</p>
+          </ng-template>
+        </section>
+
+        <section class="product-detail-section">
+          <h3>Biến thể</h3>
+          <div
+            class="variant-list"
+            *ngIf="productDetail.variants.length > 0; else noVariants"
+          >
+            <article
+              class="variant-card"
+              *ngFor="let variant of productDetail.variants"
+            >
+              <div class="variant-heading">
+                <div>
+                  <h4>{{ variant.Variant_name }}</h4>
+                  <span>{{ variant.Product_variant_id }}</span>
+                </div>
+                <span
+                  class="variant-status"
+                  [class.variant-status-empty]="variant.Status === 'out_of_stock'"
+                >
+                  {{ getVariantStatusLabel(variant.Status) }}
+                </span>
+              </div>
+
+              <dl class="variant-data">
+                <div>
+                  <dt>Thuộc tính</dt>
+                  <dd>{{ formatDetailValue(variant.Attributes) }}</dd>
+                </div>
+                <div>
+                  <dt>Giá</dt>
+                  <dd>{{ formatCurrency(variant.Price) }}</dd>
+                </div>
+                <div>
+                  <dt>Tồn kho</dt>
+                  <dd>{{ variant.Stock_quantity | number }}</dd>
+                </div>
+              </dl>
+            </article>
+          </div>
+          <ng-template #noVariants>
+            <p class="product-detail-empty">Sản phẩm chưa có biến thể.</p>
+          </ng-template>
+        </section>
+      </ng-container>
+    </div>
+
+    <footer class="product-drawer-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="closeProductDetail()"
+      >
+        Đóng
+      </button>
+      <button
+        *ngIf="canManageProduct && detail"
+        type="button"
+        class="btn btn-primary"
+        (click)="editProduct(detail)"
+      >
+        Chỉnh sửa
+      </button>
+    </footer>
+  </aside>
+</div>
+
+<div
+  class="simple-modal-backdrop"
+  *ngIf="isCreateOpen"
+  (click)="requestCloseCreateForm()"
+>
+  <div
+    class="simple-modal-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="simple-modal-title"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="simple-modal-header">
+      <div class="simple-modal-heading">
+        <h2 id="simple-modal-title" class="simple-modal-title">
+          {{ isEditMode ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm' }}
+        </h2>
+        <p class="simple-modal-subtitle">
+          {{ isEditMode ? 'Cập nhật thông tin chi tiết sản phẩm.' : 'Nhập thông tin để thêm sản phẩm mới vào danh mục.' }}
+        </p>
+      </div>
+      <button
+        type="button"
+        class="simple-btn-close"
+        (click)="requestCloseCreateForm()"
+        aria-label="Đóng"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <form class="simple-modal-form" (ngSubmit)="submitProduct()" novalidate>
+      <div class="simple-modal-body">
+        <!-- Error alert if any -->
+        <div *ngIf="createError" class="simple-alert-error">
+          {{ createError }}
+        </div>
+
+        <!-- 1. Tên sản phẩm * -->
+        <div class="simple-form-group">
+          <label class="simple-label">
+            Tên sản phẩm <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            class="simple-input"
+            [class.input-error]="formErrors['Product_name']"
+            placeholder="Nhập tên sản phẩm"
+            [(ngModel)]="createForm.Product_name"
+            name="productName"
+            (ngModelChange)="onFieldChange()"
+          />
+          <div *ngIf="formErrors['Product_name']" class="simple-error-text">
+            {{ formErrors['Product_name'] }}
+          </div>
+        </div>
+
+        <!-- 2. Row: SKU * | Danh mục * -->
+        <div class="simple-form-row col-2">
+          <div class="simple-form-group">
+            <label class="simple-label">
+              SKU <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              class="simple-input"
+              [class.input-error]="formErrors['sku']"
+              placeholder="Nhập mã SKU"
+              [(ngModel)]="createForm.sku"
+              name="productSku"
+              (ngModelChange)="onSkuChange()"
+            />
+            <div *ngIf="formErrors['sku']" class="simple-error-text">
+              {{ formErrors['sku'] }}
+            </div>
+          </div>
+
+          <div class="simple-form-group">
+            <label class="simple-label">
+              Danh mục <span class="required">*</span>
+            </label>
+            <div class="simple-select-wrap">
+              <select
+                class="simple-select"
+                [class.input-error]="formErrors['Category_id']"
+                [(ngModel)]="createForm.Category_id"
+                name="categoryId"
+                (ngModelChange)="onFieldChange()"
+              >
+                <option value="" disabled selected>Chọn danh mục</option>
+                <option
+                  *ngFor="let cat of categories"
+                  [value]="cat.Category_id || cat._id"
+                >
+                  {{ cat.Category_name }}
+                </option>
+              </select>
+              <span class="select-chevron">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </span>
+            </div>
+            <div *ngIf="formErrors['Category_id']" class="simple-error-text">
+              {{ formErrors['Category_id'] }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Mô tả sản phẩm -->
+        <div class="simple-form-group">
+          <label class="simple-label">Mô tả sản phẩm</label>
+          <textarea
+            class="simple-textarea"
+            rows="3"
+            placeholder="Nhập mô tả sản phẩm"
+            [(ngModel)]="createForm.Description"
+            name="productDescription"
+            (ngModelChange)="onFieldChange()"
+          ></textarea>
+        </div>
+
+        <!-- 4. Row: Giá bán (VND) * | Tồn kho * -->
+        <div class="simple-form-row col-2">
+          <div class="simple-form-group">
+            <label class="simple-label">
+              Giá bán (VND) <span class="required">*</span>
+            </label>
+            <input
+              type="number"
+              class="simple-input"
+              [class.input-error]="formErrors['Price']"
+              placeholder="Nhập giá bán"
+              [(ngModel)]="createForm.Price"
+              name="basePrice"
+              min="0"
+              (ngModelChange)="onBasePriceChange()"
+            />
+            <div *ngIf="formErrors['Price']" class="simple-error-text">
+              {{ formErrors['Price'] }}
+            </div>
+          </div>
+
+          <div class="simple-form-group">
+            <label class="simple-label">
+              Tồn kho <span class="required">*</span>
+            </label>
+            <input
+              type="number"
+              class="simple-input"
+              [class.input-error]="formErrors['Stock_quantity']"
+              placeholder="0"
+              [(ngModel)]="createForm.Stock_quantity"
+              name="baseStock"
+              min="0"
+              (ngModelChange)="onBaseStockChange()"
+            />
+            <div *ngIf="formErrors['Stock_quantity']" class="simple-error-text">
+              {{ formErrors['Stock_quantity'] }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Trạng thái * -->
+        <div class="simple-form-group">
+          <label class="simple-label">
+            Trạng thái <span class="required">*</span>
+          </label>
+          <div class="simple-select-wrap">
+            <select
+              class="simple-select"
+              [(ngModel)]="createForm.Status"
+              name="productStatus"
+              (ngModelChange)="onFieldChange()"
+            >
+              <option value="on_sale">Đang bán</option>
+              <option value="out_of_stock">Ngừng bán</option>
+            </select>
+            <span class="select-chevron">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <!-- 6. Hình ảnh sản phẩm -->
+        <div class="simple-form-group">
+          <label class="simple-label">Hình ảnh sản phẩm</label>
+          <div class="simple-upload-box" (click)="filePicker.click()">
+            <div class="upload-box-left">
+              <div class="upload-icon-wrapper">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <div class="upload-meta">
+                <span class="upload-title">Tải ảnh sản phẩm lên</span>
+                <span class="upload-hint">JPG, PNG · Tối đa 5 MB</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn-choose-file"
+              (click)="$event.stopPropagation(); filePicker.click()"
+            >
+              Chọn ảnh
+            </button>
+            <input
+              #filePicker
+              type="file"
+              (change)="onFileSelected($event)"
+              accept="image/png, image/jpeg, image/jpg, image/webp"
+              multiple
+              hidden
+            />
+          </div>
+          <div *ngIf="imageError" class="simple-error-text">{{ imageError }}</div>
+
+          <!-- Thumbnails preview strip -->
+          <div *ngIf="createForm.images.length > 0" class="simple-thumb-strip">
+            <div
+              *ngFor="let img of createForm.images; let i = index"
+              class="simple-thumb-item"
+            >
+              <img [src]="img" alt="Ảnh sản phẩm" />
+              <button
+                type="button"
+                class="thumb-del-btn"
+                (click)="removeImage(i)"
+                title="Xóa ảnh"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Biến thể sản phẩm (Khu vực riêng biệt A) -->
+        <div class="product-section-card variants-card-section">
+          <div class="section-card-header">
+            <div class="header-text-group">
+              <label class="simple-label section-card-title mb-0">Biến thể sản phẩm</label>
+              <p class="section-card-desc">
+                Các phiên bản có giá bán hoặc tồn kho riêng (ví dụ: RAM 8GB, 16GB, Màu sắc...).
+              </p>
+            </div>
+            <button
+              type="button"
+              class="btn-section-action"
+              (click)="addVariant()"
+            >
+              + Thêm biến thể
+            </button>
+          </div>
+
+          <!-- Table Container -->
+          <div class="section-table-scroll">
+            <div class="variants-table-header">
+              <span class="col-th name-th">Biến thể</span>
+              <span class="col-th sku-th">SKU</span>
+              <span class="col-th price-th">Giá bán (VND)</span>
+              <span class="col-th stock-th">Tồn kho</span>
+              <span class="col-th action-th"></span>
+            </div>
+
+            <div class="variants-table-body">
+              <div
+                *ngFor="let variant of createForm.variants; let vi = index"
+                class="variant-row"
+              >
+                <div class="col-td name-td">
+                  <input
+                    type="text"
+                    class="simple-input"
+                    placeholder="Tên (VD: 8GB / 256GB)"
+                    [(ngModel)]="variant.Variant_name"
+                    [name]="'variantName_' + vi"
+                    (ngModelChange)="onFieldChange()"
+                  />
+                </div>
+                <div class="col-td sku-td">
+                  <input
+                    type="text"
+                    class="simple-input"
+                    placeholder="Mã SKU"
+                    [(ngModel)]="variant.sku"
+                    [name]="'variantSku_' + vi"
+                    (ngModelChange)="onFieldChange()"
+                  />
+                </div>
+                <div class="col-td price-td">
+                  <input
+                    type="number"
+                    class="simple-input"
+                    placeholder="Giá bán"
+                    [(ngModel)]="variant.Price"
+                    [name]="'variantPrice_' + vi"
+                    min="0"
+                    (ngModelChange)="onVariantPriceChange(vi)"
+                  />
+                </div>
+                <div class="col-td stock-td">
+                  <input
+                    type="number"
+                    class="simple-input"
+                    placeholder="0"
+                    [(ngModel)]="variant.Stock_quantity"
+                    [name]="'variantStock_' + vi"
+                    min="0"
+                    (ngModelChange)="onVariantStockChange(vi)"
+                  />
+                </div>
+                <div class="col-td action-td">
+                  <button
+                    type="button"
+                    class="btn-row-delete"
+                    (click)="removeVariant(vi)"
+                    [disabled]="createForm.variants.length <= 1"
+                    [attr.title]="createForm.variants.length <= 1 ? 'Sản phẩm phải có ít nhất 1 biến thể' : 'Xóa biến thể này'"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. Thông số kỹ thuật (Khu vực riêng biệt B - Cách 24px) -->
+        <div class="product-section-card specs-card-section">
+          <div class="section-card-header">
+            <div class="header-text-group">
+              <label class="simple-label section-card-title mb-0">Thông số kỹ thuật</label>
+              <p class="section-card-desc">
+                Các đặc điểm mô tả cấu hình sản phẩm như CPU, RAM, màn hình, dung lượng pin và hệ điều hành.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="btn-section-action"
+              (click)="addSpec()"
+            >
+              + Thêm thông số
+            </button>
+          </div>
+
+          <!-- Gợi ý thông số nhanh -->
+          <div class="specs-quick-chips">
+            <span class="chips-guide-label">Gợi ý nhanh:</span>
+            <div class="chips-list">
+              <button
+                type="button"
+                *ngFor="let sug of commonSpecSuggestions"
+                class="chip-suggest-btn"
+                (click)="applySpecSuggestion(sug)"
+              >
+                + {{ sug }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="section-table-scroll">
+            <!-- Tiêu đề cột thông số -->
+            <div class="specs-table-header" *ngIf="createForm.specs && createForm.specs.length > 0">
+              <span class="col-head-key">Tên thông số</span>
+              <span class="col-head-val">Giá trị cấu hình</span>
+              <span class="col-head-action"></span>
+            </div>
+
+            <!-- Danh sách dòng thông số -->
+            <div class="specs-rows-body" *ngIf="createForm.specs && createForm.specs.length > 0">
+              <div
+                *ngFor="let spec of createForm.specs; let si = index"
+                class="spec-row"
+              >
+                <div class="spec-col-key">
+                  <input
+                    type="text"
+                    class="simple-input"
+                    placeholder="Tên thông số (VD: CPU)"
+                    [(ngModel)]="spec.key"
+                    [name]="'specKey_' + si"
+                    (ngModelChange)="onFieldChange()"
+                  />
+                </div>
+                <div class="spec-col-val">
+                  <input
+                    type="text"
+                    class="simple-input"
+                    placeholder="Giá trị cấu hình (VD: Apple M3)"
+                    [(ngModel)]="spec.value"
+                    [name]="'specVal_' + si"
+                    (ngModelChange)="onFieldChange()"
+                  />
+                </div>
+                <div class="spec-col-action">
+                  <button
+                    type="button"
+                    class="btn-row-delete"
+                    (click)="removeSpec(si)"
+                    title="Xóa thông số này"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trạng thái trống khi chưa có thông số -->
+            <div class="specs-empty-note" *ngIf="!createForm.specs || createForm.specs.length === 0">
+              <span>Chưa có thông số cấu hình. Bấm vào <strong>chip gợi ý</strong> phía trên hoặc <strong>+ Thêm thông số</strong> để bổ sung.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="simple-modal-footer">
+        <button
+          type="button"
+          class="btn-modal-cancel"
+          (click)="requestCloseCreateForm()"
+        >
+          Hủy
+        </button>
+        <button
+          type="submit"
+          class="btn-modal-submit"
+          [disabled]="isSubmitting"
+        >
+          <span *ngIf="isSubmitting" class="spinner-inline"></span>
+          {{ isEditMode ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal xác nhận hủy bỏ thay đổi (nếu form dirty) -->
+<div
+  class="product-create-backdrop confirm-discard-backdrop"
+  *ngIf="isConfirmCloseOpen"
+  (click)="cancelCloseConfirm()"
+>
+  <div class="confirm-discard-dialog" (click)="$event.stopPropagation()">
+    <div class="confirm-discard-header">
+      <span class="warning-icon">⚠</span>
+      <h3>Bạn có thay đổi chưa lưu</h3>
+    </div>
+    <p>Nếu đóng form lúc này, các thông tin bạn vừa nhập hoặc chỉnh sửa sẽ bị mất. Bạn có chắc chắn muốn hủy không?</p>
+    <div class="confirm-discard-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancelCloseConfirm()">
+        Tiếp tục chỉnh sửa
+      </button>
+      <button type="button" class="btn btn-danger" (click)="confirmDiscardChanges()">
+        Rời khỏi và hủy thay đổi
+      </button>
+    </div>
+  </div>
+</div>
+
+<div
+  class="product-create-backdrop"
+  *ngIf="isDeleteOpen"
+  (click)="closeDeleteConfirm()"
+>
+  <aside
+    class="product-confirm-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="confirm-delete-title"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="product-confirm-header">
+      <div>
+        <h2 id="confirm-delete-title">Xác nhận xóa sản phẩm</h2>
+        <p>Hành động này không thể hoàn tác.</p>
+      </div>
+      <button
+        type="button"
+        class="drawer-close-button"
+        (click)="closeDeleteConfirm()"
+        [disabled]="isDeleting"
+        aria-label="Đóng hộp thoại xóa"
+      >
+        ×
+      </button>
+    </header>
+
+    <div class="product-confirm-body">
+      <p>
+        Bạn có chắc chắn muốn xóa sản phẩm
+        <strong>{{ deletingProduct?.Product_name }}</strong>
+        <span *ngIf="deletingProduct?.Product_id"> (Mã: <code>{{ deletingProduct?.Product_id }}</code>)</span>?
+      </p>
+      <p class="confirm-warning">
+        Toàn bộ dữ liệu biến thể của sản phẩm này cũng sẽ bị xóa vĩnh viễn khỏi hệ thống.
+      </p>
+      <p *ngIf="deleteError" class="inline-error" role="alert">
+        {{ deleteError }}
+      </p>
+    </div>
+
+    <footer class="product-confirm-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="closeDeleteConfirm()"
+        [disabled]="isDeleting"
+      >
+        Hủy
+      </button>
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="confirmDelete()"
+        [disabled]="isDeleting"
+      >
+        <span *ngIf="isDeleting" class="spinner-inline"></span>
+        {{ isDeleting ? 'Đang xóa...' : 'Xóa sản phẩm' }}
+      </button>
+    </footer>
+  </aside>
+</div>
+
+<!-- ==================== MODAL NHẬP HÀNG LOẠT (BULK IMPORT) ==================== -->
+<div
+  class="bulk-import-backdrop"
+  *ngIf="isBulkImportOpen"
+  (click)="closeBulkImportModal()"
+>
+  <div
+    class="bulk-import-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="bulk-import-title"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="bulk-modal-header">
+      <div class="bulk-modal-heading">
+        <h2 id="bulk-import-title" class="bulk-modal-title">
+          Nhập sản phẩm hàng loạt
+        </h2>
+        <p class="bulk-modal-subtitle">
+          Tải tệp CSV/Excel danh sách sản phẩm để thêm nhanh nhiều sản phẩm vào danh mục.
+        </p>
+      </div>
+      <button
+        type="button"
+        class="simple-btn-close"
+        (click)="closeBulkImportModal()"
+        [disabled]="isImporting"
+        aria-label="Đóng"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="bulk-modal-body">
+      <!-- Error alert -->
+      <div *ngIf="importError" class="simple-alert-error mb-3">
+        {{ importError }}
+      </div>
+
+      <!-- Step 1: Download Template banner -->
+      <div class="template-banner">
+        <div class="banner-left">
+          <div class="banner-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h4 class="banner-title">Mẫu tệp nhập sản phẩm chuẩn</h4>
+            <p class="banner-desc">
+              Tải file mẫu định dạng Excel/CSV (UTF-8 tiếng Việt) có sẵn cột dữ liệu và dòng ví dụ mẫu.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="btn btn-outline-success btn-download-template"
+          (click)="downloadImportTemplate()"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Tải file mẫu .csv</span>
+        </button>
+      </div>
+
+      <!-- Step 2: Dropzone Upload -->
+      <div
+        class="bulk-dropzone"
+        [class.dragging]="isDragging"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onFileDropped($event)"
+        (click)="fileInput.click()"
+      >
+        <div class="dropzone-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </div>
+        <div class="dropzone-text">
+          <p class="primary-text">
+            Kéo thả tệp CSV / Excel vào đây, hoặc <span class="browse-link">chọn từ thiết bị</span>
+          </p>
+          <p class="sub-text">Hỗ trợ tệp định dạng .csv hoặc .xlsx dung lượng tối đa 10MB</p>
+        </div>
+        <div *ngIf="importFileName" class="selected-file-badge" (click)="$event.stopPropagation()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span class="file-name">{{ importFileName }}</span>
+          <span class="item-count">({{ importedItems.length }} dòng)</span>
+        </div>
+        <input
+          #fileInput
+          type="file"
+          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          (change)="onImportFileSelected($event)"
+          hidden
+        />
+      </div>
+
+      <!-- Step 3: Preview Table & Statistics -->
+      <div *ngIf="importedItems.length > 0" class="bulk-preview-wrapper">
+        <div class="preview-stats-bar">
+          <span class="stat-item total">
+            Tổng số: <strong>{{ importSummary.total }}</strong> dòng
+          </span>
+          <span class="stat-item valid">
+            ✓ Hợp lệ: <strong>{{ importSummary.valid }}</strong> sản phẩm
+          </span>
+          <span *ngIf="importSummary.invalid > 0" class="stat-item invalid">
+            ⚠ Lỗi/Cảnh báo: <strong>{{ importSummary.invalid }}</strong> dòng
+          </span>
+        </div>
+
+        <div class="preview-table-container">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>Dòng</th>
+                <th>Tên sản phẩm</th>
+                <th>SKU</th>
+                <th>Danh mục</th>
+                <th>Giá bán</th>
+                <th>Tồn kho</th>
+                <th>Cấu hình</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of importedItems" [class.row-invalid]="!item.isValid">
+                <td>#{{ item.rowNumber }}</td>
+                <td class="col-name" [title]="item.Product_name">{{ item.Product_name || '(Trống)' }}</td>
+                <td class="col-sku">{{ item.sku }}</td>
+                <td>{{ item.Category_name || 'Mặc định' }}</td>
+                <td class="col-price">{{ item.Price ? formatCurrency(item.Price) : '0 ₫' }}</td>
+                <td>{{ item.Stock_quantity }}</td>
+                <td class="col-specs">
+                  <span *ngIf="item.Technical_specs?.['CPU']">{{ item.Technical_specs['CPU'] }}</span>
+                  <span *ngIf="item.Technical_specs?.['RAM']"> / {{ item.Technical_specs['RAM'] }}</span>
+                  <span *ngIf="!item.Technical_specs?.['CPU'] && !item.Technical_specs?.['RAM']">-</span>
+                </td>
+                <td>
+                  <span *ngIf="item.isValid" class="badge-tag tag-success">Hợp lệ</span>
+                  <span *ngIf="!item.isValid" class="badge-tag tag-error" [title]="item.errorMessage">
+                    {{ item.errorMessage }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="bulk-modal-footer">
+      <div class="bulk-footer-info">
+        <span *ngIf="importedItems.length > 0 && importSummary.valid > 0" class="info-valid-summary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Sẵn sàng nhập <strong>{{ importSummary.valid }}</strong> sản phẩm
+          <span *ngIf="importSummary.invalid > 0" class="text-skipped"> (bỏ qua {{ importSummary.invalid }} dòng lỗi)</span>
+        </span>
+        <span *ngIf="importedItems.length === 0" class="info-empty-hint">
+          Chưa có dữ liệu nào được chọn
+        </span>
+      </div>
+
+      <div class="bulk-footer-actions">
+        <button
+          type="button"
+          class="btn-bulk-cancel"
+          (click)="closeBulkImportModal()"
+          [disabled]="isImporting"
+        >
+          Hủy bỏ
+        </button>
+        <button
+          type="button"
+          class="btn-bulk-submit"
+          (click)="submitBulkImport()"
+          [disabled]="isImporting || importSummary.valid === 0"
+        >
+          <span *ngIf="isImporting" class="spinner-inline"></span>
+          <svg *ngIf="!isImporting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>
+            {{ isImporting ? 'Đang nhập dữ liệu...' : ('Xác nhận nhập ' + (importSummary.valid > 0 ? (importSummary.valid + ' sản phẩm') : 'hàng loạt')) }}
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="toastMessage"
+  class="product-toast"
+  [class.toast-error]="toastType === 'error'"
+  role="status"
+  aria-live="polite"
+>
+  {{ toastMessage }}
+</div>
