@@ -159,36 +159,54 @@
     </div>
 
     <!-- Phân trang -->
-    <div class="pagination" *ngIf="total > 0">
-      <div class="pagination-info">
-        <span class="muted">{{ rangeStart }}–{{ rangeEnd }} / {{ total }} đơn</span>
-        <select class="page-size-select" [(ngModel)]="limit" (ngModelChange)="applyFilters()" aria-label="Số dòng mỗi trang">
-          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} / trang</option>
-        </select>
+    <footer class="table-footer" *ngIf="total > 0">
+      <div class="pagination-summary">
+        Hiển thị
+        <strong>{{ rangeStart }}</strong>–<strong>{{ rangeEnd }}</strong>
+        trong tổng số <strong>{{ total }}</strong> đơn hàng
       </div>
 
-      <nav class="pages" aria-label="Phân trang" *ngIf="totalPages > 1">
-        <button type="button" class="page-button" [disabled]="page === 1" (click)="goToPage(page - 1)" aria-label="Trang trước">
-          <ng-icon name="lucideChevronLeft" size="16px"></ng-icon>
-        </button>
-        <ng-container *ngFor="let item of pageItems">
-          <span class="page-ellipsis" *ngIf="item === null" aria-hidden="true">…</span>
-          <button
-            *ngIf="item !== null"
-            type="button"
-            class="page-button"
-            [class.active]="item === page"
-            [attr.aria-current]="item === page ? 'page' : null"
-            (click)="goToPage(item)"
+      <div class="pagination-controls">
+        <label class="page-size">
+          <span>Số dòng:</span>
+
+          <select
+            name="pageSize"
+            [(ngModel)]="limit"
+            (ngModelChange)="applyFilters()"
+            aria-label="Số dòng mỗi trang"
           >
-            {{ item }}
-          </button>
-        </ng-container>
-        <button type="button" class="page-button" [disabled]="page === totalPages" (click)="goToPage(page + 1)" aria-label="Trang sau">
-          <ng-icon name="lucideChevronRight" size="16px"></ng-icon>
+            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
+              {{ size }}
+            </option>
+          </select>
+        </label>
+
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="page <= 1 || isLoading"
+          (click)="goToPage(page - 1)"
+          aria-label="Trang trước"
+        >
+          ‹
         </button>
-      </nav>
-    </div>
+
+        <span class="current-page">
+          {{ page }} / {{ totalPages }}
+        </span>
+
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="page >= totalPages || isLoading"
+          (click)="goToPage(page + 1)"
+          aria-label="Trang sau"
+        >
+          ›
+        </button>
+      </div>
+    </footer>
 
   </section>
 </section>
