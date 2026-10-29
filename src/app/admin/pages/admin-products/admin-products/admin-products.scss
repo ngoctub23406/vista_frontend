@@ -207,7 +207,7 @@ textarea {
   width: 100%;
   overflow-x: auto;
   border: 1px solid #e2e8f0;
-  border-radius: 7px;
+  border-radius: 10px;
 }
 
 table {
@@ -242,6 +242,33 @@ table {
 
   tbody tr:hover {
     background: #f8fbff;
+  }
+}
+
+.products-table {
+  font-size: 13px;
+
+  th {
+    height: auto;
+    padding: 12px 14px;
+    border-bottom: 0;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  td {
+    height: auto;
+    padding: 14px;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 0;
+    color: #475569;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  tbody tr:hover td {
+    background: #f8fafc;
   }
 }
 
@@ -288,18 +315,18 @@ table {
 }
 
 .product-name {
-  overflow: hidden;
   color: #1e293b;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .product-id {
-  color: #94a3b8;
-  font-size: 10px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 .sku-cell {
@@ -308,12 +335,12 @@ table {
 
 .price-cell {
   color: #1e293b;
-  font-weight: 600;
+  font-weight: 400;
   white-space: nowrap;
 }
 
 .stock-value {
-  font-weight: 600;
+  font-weight: 400;
   color: #334155;
 }
 
@@ -324,45 +351,21 @@ table {
 .status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
-  border-radius: 5px;
-  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
 }
 
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
 .status-active {
-  color: #15803d;
+  color: #16a34a;
   background: #f0fdf4;
 }
 
 .status-empty {
   color: #dc2626;
   background: #fef2f2;
-}
-
-.view-button {
-  padding: 5px 8px;
-  border: 0;
-  border-radius: 4px;
-  color: #2563eb;
-  background: transparent;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: #eff6ff;
-  }
 }
 
 .table-state {
@@ -1350,38 +1353,41 @@ table {
 
 
 .actions-cell {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.row-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
   white-space: nowrap;
 }
 
-.action-button {
-  padding: 5px 8px;
+.link-button {
+  padding: 0;
   border: 0;
-  border-radius: 4px;
-  background: transparent;
-  font-family: inherit;
+  background: none;
+  color: #2563eb;
+  font: inherit;
   font-size: 12px;
-  font-weight: 600;
+  line-height: normal;
+  text-align: left;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.edit-button {
-  color: #0284c7;
 
   &:hover {
-    background: #f0f9ff;
+    text-decoration: underline;
   }
 }
 
-.delete-button {
+.action-view,
+.action-edit {
+  color: #2563eb;
+}
+
+.action-delete {
   color: #dc2626;
-
-  &:hover {
-    background: #fef2f2;
-  }
 }
 
 .btn-danger {
@@ -2403,12 +2409,15 @@ table {
 }
 
 .simple-upload-box {
+  min-height: 58px;
+  box-sizing: border-box;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 10px 14px;
+  border-radius: 6px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   background: #ffffff;
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease;
@@ -2420,11 +2429,13 @@ table {
 
   .upload-box-left {
     display: flex;
+    min-width: 0;
     align-items: center;
     gap: 12px;
   }
 
   .upload-icon-wrapper {
+    flex: 0 0 auto;
     color: #9ca3af;
     display: flex;
     align-items: center;
@@ -2433,6 +2444,7 @@ table {
 
   .upload-meta {
     display: flex;
+    min-width: 0;
     flex-direction: column;
     gap: 1px;
   }
@@ -2446,14 +2458,18 @@ table {
   .upload-hint {
     font-size: 11.5px;
     color: #9ca3af;
+    line-height: 1.4;
   }
 
   .btn-choose-file {
+    min-height: 32px;
+    flex: 0 0 auto;
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 6px;
-    padding: 6px 14px;
-    font-size: 12.5px;
+    padding: 0 12px;
+    font-family: inherit;
+    font-size: 12px;
     font-weight: 500;
     color: #374151;
     cursor: pointer;
@@ -2514,22 +2530,24 @@ table {
 
 /* ==================== PHÂN TÁCH BIẾN THỂ & THÔNG SỐ (A & B) ==================== */
 .product-section-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 18px;
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0;
+  padding: 14px 0 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  gap: 12px;
+  background: transparent;
+  box-shadow: none;
 
   .section-card-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 4px 12px;
 
     .header-text-group {
-      flex: 1;
+      min-width: 0;
 
       .section-card-title {
         font-size: 13px;
@@ -2541,39 +2559,46 @@ table {
       }
 
       .section-card-desc {
-        font-size: 12px;
+        font-size: 11.5px;
         color: #64748b;
-        margin: 3px 0 0 0;
-        line-height: 1.35;
+        max-width: 600px;
+        margin: 4px 0 0;
+        line-height: 1.5;
       }
     }
 
     .btn-section-action {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
+      min-height: 32px;
+      padding: 0 10px;
+      border: 1px solid #e5e7eb;
       border-radius: 6px;
-      padding: 5px 12px;
-      color: #1d4ed8;
-      font-size: 12.5px;
+      background: #ffffff;
+      color: #2563eb;
+      font: inherit;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
-      line-height: 1.4;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      transition: all 0.15s ease;
+      justify-content: center;
+      transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 
       &:hover {
-        background: #dbeafe;
-        border-color: #93c5fd;
-        color: #1e40af;
-        box-shadow: 0 1px 2px rgba(37, 99, 235, 0.1);
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #1d4ed8;
+      }
+
+      &:focus-visible {
+        outline: 2px solid #93c5fd;
+        outline-offset: 2px;
       }
     }
   }
 
   .section-table-scroll {
+    min-width: 0;
     overflow-x: auto;
 
     &::-webkit-scrollbar {
@@ -2586,8 +2611,10 @@ table {
   }
 
   .btn-row-delete {
-    width: 36px;
+    width: 32px;
     height: 38px;
+    margin: 0 auto;
+    box-sizing: border-box;
     border-radius: 6px;
     border: 1px solid #fee2e2;
     background: #fff5f5;
@@ -2618,18 +2645,15 @@ table {
 
 /* Khu vực A: Biến thể sản phẩm */
 .variants-card-section {
-  background: #ffffff;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-
   .variants-table-header {
     display: grid;
-    grid-template-columns: 1.15fr 1fr 1fr 0.75fr 36px;
+    grid-template-columns: minmax(120px, 1.15fr) minmax(100px, 1fr) minmax(110px, 1fr) minmax(76px, 0.75fr) 32px;
     gap: 8px;
     font-size: 12px;
     font-weight: 600;
     color: #475569;
     padding: 0 2px 4px 2px;
-    min-width: 440px;
+    min-width: 480px;
 
     .col-th {
       white-space: nowrap;
@@ -2640,42 +2664,39 @@ table {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    min-width: 440px;
+    min-width: 480px;
 
     .variant-row {
       display: grid;
-      grid-template-columns: 1.15fr 1fr 1fr 0.75fr 36px;
+      grid-template-columns: minmax(120px, 1.15fr) minmax(100px, 1fr) minmax(110px, 1fr) minmax(76px, 0.75fr) 32px;
       gap: 8px;
       align-items: center;
 
       .simple-input {
         height: 38px;
+        box-sizing: border-box;
         font-size: 13px;
-        border: 1px solid #cbd5e1;
+        border: 1px solid #e5e7eb;
         border-radius: 6px;
         padding: 0 12px;
         background: #ffffff;
-        color: #0f172a;
+        color: #111827;
 
         &:focus {
           border-color: #2563eb;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
       }
     }
   }
 }
 
-/* Khu vực B: Thông số kỹ thuật (Cách nhau 24px) */
+/* Khu vực B: Thông số kỹ thuật */
 .specs-card-section {
-  margin-top: 24px;
-  background: #f8fafc;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-
   .specs-quick-chips {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 
     .chips-guide-label {
       font-size: 11.5px;
@@ -2686,27 +2707,33 @@ table {
     .chips-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 6px 8px;
       align-items: center;
+      min-width: 0;
 
       .chip-suggest-btn {
+        min-height: 28px;
         background: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-radius: 9999px;
-        padding: 3px 11px;
-        font-size: 11.5px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 3px 9px;
+        font-size: 12px;
         font-weight: 500;
         color: #334155;
+        font-family: inherit;
         cursor: pointer;
         line-height: 1.4;
-        transition: all 0.15s ease;
+        transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 
         &:hover {
           background: #eff6ff;
           border-color: #3b82f6;
           color: #1d4ed8;
-          transform: translateY(-1px);
-          box-shadow: 0 1px 2px rgba(37, 99, 235, 0.1);
+        }
+
+        &:focus-visible {
+          outline: 2px solid #93c5fd;
+          outline-offset: 2px;
         }
       }
     }
@@ -2714,7 +2741,7 @@ table {
 
   .specs-table-header {
     display: grid;
-    grid-template-columns: 1.1fr 1.6fr 36px;
+    grid-template-columns: minmax(120px, 1.1fr) minmax(180px, 1.6fr) 32px;
     gap: 8px;
     font-size: 12px;
     font-weight: 600;
@@ -2736,55 +2763,57 @@ table {
 
     .spec-row {
       display: grid;
-      grid-template-columns: 1.1fr 1.6fr 36px;
+      grid-template-columns: minmax(120px, 1.1fr) minmax(180px, 1.6fr) 32px;
       gap: 8px;
       align-items: center;
 
       .simple-input {
         height: 38px;
+        box-sizing: border-box;
         font-size: 13px;
-        border: 1px solid #cbd5e1;
+        border: 1px solid #e5e7eb;
         border-radius: 6px;
         padding: 0 12px;
         background: #ffffff;
-        color: #0f172a;
+        color: #111827;
 
         &:focus {
           border-color: #2563eb;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
       }
     }
   }
 
   .specs-empty-note {
-    background: #ffffff;
-    border: 1px dashed #cbd5e1;
-    border-radius: 8px;
-    padding: 11px 14px;
-    font-size: 12px;
+    padding: 2px 0;
+    font-size: 11.5px;
     color: #64748b;
-    line-height: 1.45;
+    line-height: 1.5;
 
     strong {
-      color: #0f172a;
+      color: #475569;
       font-weight: 600;
     }
   }
 }
 
 .simple-modal-footer {
-  padding: 12px 24px 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 14px 20px 18px;
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  border-top: none;
+  gap: 8px;
+  border-top: 1px solid #f1f5f9;
+  background: #ffffff;
 
   .btn-modal-cancel {
+    min-height: 36px;
+    padding: 0 16px;
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 6px;
-    padding: 8px 18px;
     font-size: 13px;
     font-weight: 500;
     color: #374151;
@@ -2799,10 +2828,11 @@ table {
   }
 
   .btn-modal-submit {
+    min-height: 36px;
     background: #1d4ed8;
     border: none;
     border-radius: 6px;
-    padding: 8px 20px;
+    padding: 0 16px;
     font-size: 13px;
     font-weight: 500;
     color: #ffffff;
@@ -2828,6 +2858,34 @@ table {
       border-top-color: #ffffff;
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .simple-upload-box {
+    flex-wrap: wrap;
+    align-items: center;
+
+    .btn-choose-file {
+      margin-left: auto;
+    }
+  }
+
+  .product-section-card .section-card-header {
+    grid-template-columns: minmax(0, 1fr);
+
+    .btn-section-action {
+      justify-self: start;
+    }
+  }
+
+  .simple-modal-footer {
+    padding: 12px 16px 16px;
+
+    .btn-modal-cancel,
+    .btn-modal-submit {
+      flex: 0 1 auto;
     }
   }
 }
