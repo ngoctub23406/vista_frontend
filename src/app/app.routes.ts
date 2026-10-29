@@ -33,6 +33,7 @@ import { AdminResetPassword } from './admin/pages/admin-reset-password/admin-res
 import { AdminDashboard } from './admin/pages/admin-dashboard/admin-dashboard';
 import { AdminChangePassword } from './admin/pages/admin-change-password/admin-change-password';
 import { AdminOrders } from './admin/pages/admin-orders/admin-orders';
+import { AdminProducts } from './admin/pages/admin-products/admin-products/admin-products';
 import { AdminStaff } from './admin/pages/admin-staff/admin-staff';
 import { adminManagerGuard } from './guards/admin-manager-guard';
 
@@ -81,6 +82,10 @@ export const routes: Routes = [
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
+      },
+      {
+        path: 'products',
+        component: AdminProducts,
       },
     ],
   },
