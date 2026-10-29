@@ -69,7 +69,7 @@
           <tr *ngFor="let member of staff; let i = index; trackBy: trackByUserId">
             <td class="cell-index">{{ rangeStart + i }}</td>
             <td class="cell-name">{{ member.Full_name || member.Username }}</td>
-            <td class="cell-muted">{{ member.Email }}</td>
+            <td class="cell-muted cell-email" [title]="member.Email">{{ member.Email }}</td>
             <td>{{ getRoleLabel(member.Role) }}</td>
             <td class="cell-phone">{{ formatPhone(member.Phone_number) }}</td>
             <td>
@@ -142,41 +142,31 @@
 
     <!-- Phân trang -->
     <div class="pagination">
-      <div class="pagination-info">
-        <span class="range-text">{{ rangeText }}</span>
+      <div class="pagination-summary">
+        Hiển thị
+        <strong>{{ rangeStart }}</strong>–<strong>{{ rangeEnd }}</strong>
+        trong tổng số <strong>{{ total }}</strong> nhân viên
+      </div>
 
+      <div class="pagination-controls">
         <div class="page-size">
-          <label for="staff-page-size">Số dòng mỗi trang</label>
+          <label for="staff-page-size">Số dòng:</label>
           <div class="select-wrap select-wrap--small">
             <select id="staff-page-size" [(ngModel)]="limit" (ngModelChange)="applyFilters()">
-              <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} dòng</option>
+              <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
             </select>
             <ng-icon name="lucideChevronDown" size="14px"></ng-icon>
           </div>
         </div>
-      </div>
 
-      <nav class="pages" aria-label="Phân trang">
-        <button type="button" class="page-button" [disabled]="page === 1" (click)="goToPage(page - 1)" aria-label="Trang trước">
-          <ng-icon name="lucideChevronLeft" size="14px"></ng-icon>
+        <button type="button" class="page-button" [disabled]="page <= 1" (click)="goToPage(page - 1)" aria-label="Trang trước">
+          ‹
         </button>
-        <ng-container *ngFor="let item of pageItems">
-          <span class="page-ellipsis" *ngIf="item === null" aria-hidden="true">…</span>
-          <button
-            *ngIf="item !== null"
-            type="button"
-            class="page-button"
-            [class.active]="item === page"
-            [attr.aria-current]="item === page ? 'page' : null"
-            (click)="goToPage(item)"
-          >
-            {{ item }}
-          </button>
-        </ng-container>
-        <button type="button" class="page-button" [disabled]="page === totalPages" (click)="goToPage(page + 1)" aria-label="Trang sau">
-          <ng-icon name="lucideChevronRight" size="14px"></ng-icon>
+        <span class="current-page">{{ page }} / {{ totalPages }}</span>
+        <button type="button" class="page-button" [disabled]="page >= totalPages" (click)="goToPage(page + 1)" aria-label="Trang sau">
+          ›
         </button>
-      </nav>
+      </div>
     </div>
   </section>
 </section>

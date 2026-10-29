@@ -141,7 +141,7 @@
     </p>
 
     <div class="table-wrapper">
-      <table>
+      <table class="products-table">
         <thead>
           <tr>
             <th class="product-column">Sản phẩm</th>
@@ -211,44 +211,45 @@
               </span>
             </td>
 
-            <td>
+            <td class="status-cell">
               <span
                 class="status-badge"
                 [class.status-active]="product.Status === 'on_sale'"
                 [class.status-empty]="product.Status === 'out_of_stock'"
               >
-                <span class="status-dot"></span>
                 {{ getProductStatusLabel(product.Status) }}
               </span>
             </td>
 
             <td class="actions-cell">
-              <button
-                type="button"
-                class="action-button view-button"
-                (click)="viewProduct(product)"
-                [attr.aria-label]="'Xem sản phẩm ' + product.Product_name"
-              >
-                Xem
-              </button>
-              <button
-                *ngIf="canManageProduct"
-                type="button"
-                class="action-button edit-button"
-                (click)="editProduct(product)"
-                [attr.aria-label]="'Chỉnh sửa sản phẩm ' + product.Product_name"
-              >
-                Sửa
-              </button>
-              <button
-                *ngIf="canManageProduct"
-                type="button"
-                class="action-button delete-button"
-                (click)="openDeleteConfirm(product)"
-                [attr.aria-label]="'Xóa sản phẩm ' + product.Product_name"
-              >
-                Xóa
-              </button>
+              <div class="row-actions">
+                <button
+                  type="button"
+                  class="link-button action-view"
+                  (click)="viewProduct(product)"
+                  [attr.aria-label]="'Xem sản phẩm ' + product.Product_name"
+                >
+                  Xem
+                </button>
+                <button
+                  *ngIf="canManageProduct"
+                  type="button"
+                  class="link-button action-edit"
+                  (click)="editProduct(product)"
+                  [attr.aria-label]="'Chỉnh sửa sản phẩm ' + product.Product_name"
+                >
+                  Chỉnh sửa
+                </button>
+                <button
+                  *ngIf="canManageProduct"
+                  type="button"
+                  class="link-button action-delete"
+                  (click)="openDeleteConfirm(product)"
+                  [attr.aria-label]="'Xóa sản phẩm ' + product.Product_name"
+                >
+                  Xóa
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
