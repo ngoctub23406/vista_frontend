@@ -442,7 +442,28 @@ export class AdminProducts implements OnInit, OnDestroy {
   }
 
   getProductSku(product: AdminProduct): string {
-    return product.variants?.[0]?.Product_variant_id || product.Product_id;
+    const firstVariant = product.variants?.[0];
+    const variantSku =
+      typeof (firstVariant?.Attributes as any)?.sku === 'string'
+        ? (firstVariant.Attributes as any).sku.trim()
+        : typeof (firstVariant as any)?.sku === 'string'
+          ? (firstVariant as any).sku.trim()
+          : '';
+
+    if (variantSku) {
+      return variantSku;
+    }
+
+    const specsSku =
+      typeof (product.Technical_specs as any)?.sku === 'string'
+        ? (product.Technical_specs as any).sku.trim()
+        : '';
+
+    if (specsSku) {
+      return specsSku;
+    }
+
+    return product.Product_id || '—';
   }
 
   getProductStatusLabel(status: AdminProductStatus): string {
@@ -1218,8 +1239,8 @@ export class AdminProducts implements OnInit, OnDestroy {
     this.isDeleteOpen = true;
   }
 
-  closeDeleteConfirm(): void {
-    if (this.isDeleting) {
+  closeDeleteConfirm(force: boolean = false): void {
+    if (this.isDeleting && !force) {
       return;
     }
     this.isDeleteOpen = false;
@@ -1246,7 +1267,8 @@ export class AdminProducts implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response) => {
-          this.closeDeleteConfirm();
+          this.isDeleting = false;
+          this.closeDeleteConfirm(true);
           this.showToast(response?.message || 'Xóa sản phẩm thành công.', 'success');
 
           if (this.isDetailOpen && this.detailProductId === targetProduct.Product_id) {
