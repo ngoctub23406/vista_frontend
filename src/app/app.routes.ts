@@ -36,6 +36,7 @@ import { AdminOrders } from './admin/pages/admin-orders/admin-orders';
 import { AdminProducts } from './admin/pages/admin-products/admin-products/admin-products';
 import { AdminStaff } from './admin/pages/admin-staff/admin-staff';
 import { adminManagerGuard } from './guards/admin-manager-guard';
+import { AdminReturnsComponent } from './admin/pages/admin-returns/admin-returns';
 
 export const routes: Routes = [
   // =========================
@@ -86,6 +87,10 @@ export const routes: Routes = [
       {
         path: 'products',
         component: AdminProducts,
+      },
+      {
+        path: 'returns',
+        component: AdminReturnsComponent,
       },
     ],
   },
