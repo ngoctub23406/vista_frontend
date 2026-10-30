@@ -254,6 +254,13 @@
                 </div>
                 
                 <p class="review-text" *ngIf="review.comment">{{ review.comment }}</p>
+                <div class="shop-reply" *ngIf="review.shopReply">
+                  <div class="shop-reply-head">
+                    <strong>Phản hồi từ VISTA</strong>
+                    <span *ngIf="review.shopReply.date">{{ review.shopReply.date }}</span>
+                  </div>
+                  <p>{{ review.shopReply.content }}</p>
+                </div>
 
                 <div class="review-media-frame" *ngIf="review.mediaItems?.length">
                   <div class="review-media-grid">

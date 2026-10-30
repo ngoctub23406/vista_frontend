@@ -47,7 +47,7 @@ export class ProductDetail implements OnInit {
   
   private compareSubscription?: Subscription;
   
-  reviews: any[] = []; // 
+  reviews: any[] = []; 
 
   constructor(
     private productService: ProductService,
@@ -389,7 +389,6 @@ addToCompare(): void {
         this.cdr.detectChanges();
       },
       error: () => {
-        // Product detail van hien review co san neu API review rieng chua duoc gan route.
       },
     });
   }
@@ -679,6 +678,9 @@ addToCompare(): void {
           createdAtMs: this.getReviewTime(createdAt),
           images: mediaItems,
           mediaItems,
+          shopReply: review.Shop_reply?.Content
+            ? { content: String(review.Shop_reply.Content), date: this.formatReviewDate(review.Shop_reply.Replied_at) }
+            : null,
           isPersisted: true,
         };
       })
