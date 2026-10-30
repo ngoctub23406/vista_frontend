@@ -230,16 +230,20 @@ export class AdminReturnsComponent implements OnInit, OnDestroy {
           if (res.success && res.data) {
             this.returns = res.data;
             this.total = res.pagination?.total ?? res.data.length;
-            this.totalPages = res.pagination?.totalPages ?? Math.ceil(this.total / this.limit) ?? 1;
+            this.totalPages = Math.max(1, res.pagination?.totalPages ?? Math.ceil(this.total / this.limit));
             this.errorMessage = '';
           } else {
             this.returns = [];
+            this.total = 0;
+            this.totalPages = 1;
             this.errorMessage = res.message || 'Không có dữ liệu trả về.';
           }
         },
         error: (err) => {
           if (silent) return;
           this.returns = [];
+          this.total = 0;
+          this.totalPages = 1;
           this.errorMessage = err?.error?.message || err?.message || 'Không thể kết nối đến máy chủ hoặc phiên đăng nhập đã hết hạn.';
           console.error('Error fetching returns:', err);
         }
@@ -265,11 +269,24 @@ export class AdminReturnsComponent implements OnInit, OnDestroy {
     this.loadReturns();
   }
 
-  onPageChange(newPage: number): void {
-    if (newPage >= 1 && newPage <= this.totalPages && newPage !== this.page) {
-      this.page = newPage;
-      this.loadReturns();
+  get rangeStart(): number {
+    return this.total === 0 ? 0 : (this.page - 1) * this.limit + 1;
+  }
+
+  get rangeEnd(): number {
+    return this.total === 0 ? 0 : Math.min(this.page * this.limit, this.total);
+  }
+
+  goToPage(newPage: number): void {
+    if (newPage < 1 || newPage > this.totalPages || newPage === this.page || this.isLoading) {
+      return;
     }
+    this.page = newPage;
+    this.loadReturns();
+  }
+
+  onPageChange(newPage: number): void {
+    this.goToPage(newPage);
   }
 
   get pagesArray(): number[] {

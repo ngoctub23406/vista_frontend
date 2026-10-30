@@ -216,16 +216,19 @@
 <aside class="drawer" *ngIf="isDetailOpen" role="dialog" aria-modal="true" aria-label="Chi tiết đơn hàng">
   <header class="drawer-header">
     <div>
-      <h2>Chi tiết đơn hàng</h2>
-      <p *ngIf="detail">{{ detail.Order_id }} · {{ detail.Created_at | date: 'dd/MM/yyyy, HH:mm' }}</p>
+      <h2 class="drawer-title">Chi tiết đơn hàng</h2>
+      <p class="drawer-meta" *ngIf="detail">{{ detail.Order_id }} &middot; {{ detail.Created_at | date: 'dd/MM/yyyy, HH:mm' }}</p>
     </div>
-    <button type="button" class="icon-button" (click)="closeDetail()" aria-label="Đóng">
-      <ng-icon name="lucideX" size="18px"></ng-icon>
+    <button type="button" class="btn-close" (click)="closeDetail()" aria-label="Đóng">
+      <ng-icon name="lucideX" size="20px"></ng-icon>
     </button>
   </header>
 
   <div class="drawer-body">
-    <div class="table-state" *ngIf="isDetailLoading">Đang tải chi tiết đơn hàng...</div>
+    <div class="drawer-loading" *ngIf="isDetailLoading">
+      <div class="spinner"></div>
+      <p>Đang tải chi tiết đơn hàng...</p>
+    </div>
 
     <div class="table-state" *ngIf="!isDetailLoading && detailError">
       <ng-icon name="lucideTriangleAlert" size="32px"></ng-icon>
@@ -233,118 +236,173 @@
     </div>
 
     <ng-container *ngIf="!isDetailLoading && detail">
-      <div class="detail-badges">
-        <span class="badge" [ngClass]="detail.Display_status">{{ getStatusLabel(detail.Display_status) }}</span>
-        <span class="badge" [class.paid]="detail.Payment_status === 'paid'" [class.unpaid]="detail.Payment_status !== 'paid'">
-          {{ getPaymentLabel(detail.Payment_status) }}
-        </span>
-      </div>
-
+      <!-- Banner dành cho chế độ chỉ xem -->
       <div class="readonly-banner" *ngIf="!canEdit">
         <ng-icon name="lucideEye" size="16px"></ng-icon>
         <span>Chế độ chỉ xem. Theo dõi tiến độ và lịch sử đơn hàng.</span>
       </div>
 
+      <!-- Badge trạng thái đầu Drawer -->
+      <div class="drawer-status-bar">
+        <span class="badge" [ngClass]="detail.Display_status">{{ getStatusLabel(detail.Display_status) }}</span>
+        <span class="badge" [class.paid]="detail.Payment_status === 'paid'" [class.unpaid]="detail.Payment_status !== 'paid'">
+          {{ getPaymentLabel(detail.Payment_status) }}
+        </span>
+        <span class="drawer-status-desc">
+          Đơn hàng &middot; {{ detail.Items.length }} sản phẩm
+        </span>
+      </div>
+
+      <!-- Mục: Thông tin khách hàng -->
       <section class="detail-section">
-        <h3>Thông tin khách hàng</h3>
-        <div class="info-grid">
+        <h3 class="section-title">Thông tin khách hàng</h3>
+        <div class="customer-info-grid">
           <div>
-            <strong>{{ detail.Receiver_name || '—' }}</strong>
-            <span class="muted">{{ detail.Receiver_phone }}</span>
+            <span class="info-label">Họ và tên:</span>
+            <span class="info-value font-semibold">{{ detail.Receiver_name || '—' }}</span>
           </div>
           <div>
-            <span class="muted">Email</span>
-            <span>{{ detail.Email || '—' }}</span>
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{ detail.Email || 'Chưa cung cấp' }}</span>
+          </div>
+          <div>
+            <span class="info-label">Số điện thoại:</span>
+            <span class="info-value">{{ detail.Receiver_phone || 'Chưa cung cấp' }}</span>
+          </div>
+          <div class="col-span-2">
+            <span class="info-label">Địa chỉ giao hàng:</span>
+            <span class="info-value">{{ detail.Address || '—' }}</span>
+          </div>
+          <div class="col-span-2" *ngIf="detail.Order_notes">
+            <span class="info-label">Ghi chú:</span>
+            <span class="info-value">{{ detail.Order_notes }}</span>
           </div>
         </div>
-        <span class="muted">Địa chỉ giao hàng</span>
-        <p>{{ detail.Address || '—' }}</p>
-        <p class="muted" *ngIf="detail.Order_notes">Ghi chú: {{ detail.Order_notes }}</p>
       </section>
 
+      <!-- Mục: Sản phẩm đã đặt -->
       <section class="detail-section">
-        <h3>Sản phẩm đã đặt</h3>
-        <table class="items-table">
-          <thead>
-            <tr>
-              <th>Sản phẩm</th>
-              <th>SL</th>
-              <th>Đơn giá</th>
-              <th>Thành tiền</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of detail.Items">
-              <td>
-                <div class="product-cell">
-                  <img [src]="item.Image" [alt]="item.Product_name" />
-                  <div>
-                    <strong>{{ item.Product_name }}</strong>
-                    <small class="muted">{{ item.Variant_name }}</small>
+        <h3 class="section-title">Sản phẩm đã đặt</h3>
+        <div class="items-table-wrapper">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Sản phẩm</th>
+                <th class="text-center">SL</th>
+                <th class="text-right">Đơn giá</th>
+                <th class="text-right">Thành tiền</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of detail.Items">
+                <td>
+                  <div class="product-item-cell">
+                    <img [src]="item.Image" [alt]="item.Product_name" />
+                    <div class="product-item-details">
+                      <span class="product-item-name" [title]="item.Product_name">{{ item.Product_name }}</span>
+                      <span class="product-item-sub" *ngIf="item.Variant_name">{{ item.Variant_name }}</span>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td>{{ item.Quantity }}</td>
-              <td>{{ formatCurrency(item.Price) }}</td>
-              <td>{{ formatCurrency(item.Total_price) }}</td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td class="text-center font-medium">{{ item.Quantity }}</td>
+                <td class="text-right">{{ formatCurrency(item.Price) }}</td>
+                <td class="text-right font-medium">{{ formatCurrency(item.Total_price) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
+      <!-- Mục: Thanh toán -->
       <section class="detail-section">
-        <h3>Thanh toán</h3>
-        <div class="summary-row"><span class="muted">Phương thức</span><span>{{ getPaymentTypeLabel(detail.Payment_type) }}</span></div>
-        <div class="summary-row"><span class="muted">Tạm tính · {{ detail.Items.length }} sản phẩm</span><span>{{ formatCurrency(detail.Total_items_price) }}</span></div>
-        <div class="summary-row" *ngIf="detail.Discount_amount"><span class="muted">Giảm giá</span><span>-{{ formatCurrency(detail.Discount_amount) }}</span></div>
-        <div class="summary-row"><span class="muted">Phí giao hàng</span><span>{{ formatCurrency(detail.Shipping_fee) }}</span></div>
-        <div class="summary-row total"><span>Tổng tiền</span><span>{{ formatCurrency(detail.Total_amount) }}</span></div>
+        <h3 class="section-title">Thanh toán</h3>
+        <div class="summary-box">
+          <div class="summary-row">
+            <span class="label">Phương thức</span>
+            <span class="value">{{ getPaymentTypeLabel(detail.Payment_type) }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Tạm tính &middot; {{ detail.Items.length }} sản phẩm</span>
+            <span class="value">{{ formatCurrency(detail.Total_items_price) }}</span>
+          </div>
+          <div class="summary-row" *ngIf="detail.Discount_amount">
+            <span class="label">Giảm giá</span>
+            <span class="value text-danger">-{{ formatCurrency(detail.Discount_amount) }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Phí giao hàng</span>
+            <span class="value">{{ formatCurrency(detail.Shipping_fee) }}</span>
+          </div>
+          <div class="summary-row total">
+            <span class="label">Tổng tiền</span>
+            <span class="value">{{ formatCurrency(detail.Total_amount) }}</span>
+          </div>
+        </div>
       </section>
 
+      <!-- Mục: Vận chuyển -->
       <section class="detail-section" *ngIf="detail.Display_status !== 'cancelled' || detail.Tracking_number">
-        <h3>Vận chuyển</h3>
-        <div class="summary-row"><span class="muted">Đơn vị vận chuyển</span><span>{{ detail.Shipping_partner || 'Đơn vị vận chuyển' }}</span></div>
-        <div class="summary-row">
-          <span class="muted">Mã vận đơn</span>
-          <strong *ngIf="detail.Tracking_number">{{ detail.Tracking_number }}</strong>
-          <span class="muted" *ngIf="!detail.Tracking_number">
-            {{ detail.Display_status === 'pending_confirmation' ? 'Tự tạo khi xác nhận đơn' : 'Chưa có' }}
-          </span>
-        </div>
-        <div class="summary-row">
-          <span class="muted">Trạng thái giao hàng</span>
-          <span>
-            {{ detail.Delivery_status === 'delivered' ? 'Đã giao' : detail.Delivery_status === 'shipping' ? 'Đang giao' : 'Chờ bàn giao' }}
-          </span>
+        <h3 class="section-title">Vận chuyển</h3>
+        <div class="summary-box">
+          <div class="summary-row">
+            <span class="label">Đơn vị vận chuyển</span>
+            <span class="value">{{ detail.Shipping_partner || 'Đơn vị vận chuyển' }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Mã vận đơn</span>
+            <span class="value font-semibold" *ngIf="detail.Tracking_number">{{ detail.Tracking_number }}</span>
+            <span class="value muted" *ngIf="!detail.Tracking_number">
+              {{ detail.Display_status === 'pending_confirmation' ? 'Tự tạo khi xác nhận đơn' : 'Chưa có' }}
+            </span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Trạng thái giao hàng</span>
+            <span class="value">
+              {{ detail.Delivery_status === 'delivered' ? 'Đã giao' : detail.Delivery_status === 'shipping' ? 'Đang giao' : 'Chờ bàn giao' }}
+            </span>
+          </div>
         </div>
       </section>
 
+      <!-- Mục: Lý do hủy (nếu có) -->
       <section class="detail-section" *ngIf="detail.Cancel_reason && detail.Display_status === 'cancelled'">
-        <h3>Lý do hủy</h3>
-        <p>{{ detail.Cancel_reason }}</p>
+        <h3 class="section-title">Lý do hủy</h3>
+        <div class="reason-box">
+          <p>{{ detail.Cancel_reason }}</p>
+        </div>
       </section>
 
+      <!-- Mục: Lịch sử trạng thái -->
       <section class="detail-section">
-        <h3>Lịch sử trạng thái</h3>
+        <h3 class="section-title">Lịch sử trạng thái</h3>
         <ol class="timeline">
           <li class="done">
-            <strong>Chờ xác nhận</strong>
-            <small class="muted">{{ detail.Created_at | date: 'dd/MM/yyyy, HH:mm' }} · Khách hàng tạo đơn</small>
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <strong class="timeline-title">Chờ xác nhận</strong>
+              <small class="timeline-sub">{{ detail.Created_at | date: 'dd/MM/yyyy, HH:mm' }} &middot; Khách hàng tạo đơn</small>
+            </div>
           </li>
           <li
             class="done"
             *ngFor="let item of historyItems"
             [class.cancelled]="item.Event === 'cancelled'"
           >
-            <strong>{{ getEventLabel(item.Event) }}</strong>
-            <small class="muted">
-              {{ item.Created_at ? (item.Created_at | date: 'dd/MM/yyyy, HH:mm') : 'Không rõ thời gian' }} · {{ item.Actor_name }}
-            </small>
-            <small *ngIf="item.Note">{{ item.Note }}</small>
-            <small class="muted inferred-note" *ngIf="item.Is_inferred">Ghi nhận từ dữ liệu cũ</small>
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <strong class="timeline-title">{{ getEventLabel(item.Event) }}</strong>
+              <small class="timeline-sub">
+                {{ item.Created_at ? (item.Created_at | date: 'dd/MM/yyyy, HH:mm') : 'Không rõ thời gian' }} &middot; {{ item.Actor_name }}
+              </small>
+              <small class="timeline-note" *ngIf="item.Note">{{ item.Note }}</small>
+              <small class="timeline-sub inferred-note" *ngIf="item.Is_inferred">Ghi nhận từ dữ liệu cũ</small>
+            </div>
           </li>
-          <li *ngFor="let step of upcomingSteps">
-            <strong>{{ step }}</strong>
+          <li class="upcoming" *ngFor="let step of upcomingSteps">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <strong class="timeline-title">{{ step }}</strong>
+            </div>
           </li>
         </ol>
       </section>
@@ -352,10 +410,10 @@
   </div>
 
   <footer class="drawer-footer">
-    <button type="button" class="btn" (click)="closeDetail()">Đóng</button>
+    <button type="button" class="btn btn-secondary" (click)="closeDetail()">Đóng</button>
     <ng-container *ngIf="canEdit && detail">
       <button type="button" class="btn btn-danger-outline" *ngIf="hasAction('cancel')" (click)="openModal('cancel')">Hủy đơn</button>
-      <button type="button" class="btn" *ngIf="hasAction('print_label')" (click)="printLabel()">In nhãn vận đơn</button>
+      <button type="button" class="btn btn-secondary" *ngIf="hasAction('print_label')" (click)="printLabel()">In nhãn vận đơn</button>
       <button type="button" class="btn btn-primary" *ngIf="primaryAction" (click)="openModal(primaryAction)">
         {{ primaryAction === 'confirm' ? 'Xác nhận đơn' : 'Bàn giao cho ĐVVC' }}
       </button>
