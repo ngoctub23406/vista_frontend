@@ -958,3 +958,34 @@
     }
   }
 }
+
+
+.shop-reply {
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  border-left: 3px solid #2563eb;
+  border-radius: 6px;
+  background: #f1f5f9;
+
+  .shop-reply-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+    font-size: 13px;
+
+    span {
+      color: #64748b;
+      font-size: 12px;
+    }
+  }
+
+  p {
+    margin: 0;
+    color: #334155;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+}
