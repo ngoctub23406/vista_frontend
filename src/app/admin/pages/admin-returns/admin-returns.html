@@ -11,75 +11,68 @@
   </header>
 
   <!-- PANEL CHÍNH: DANH SÁCH YÊU CẦU ĐỔI TRẢ -->
-  <section class="panel returns-panel">
+  <section class="panel">
     <div class="panel-heading">
-      <div class="title-group">
-        <h2>Danh sách yêu cầu đổi trả</h2>
-        <span class="panel-count">{{ total }} yêu cầu trong hệ thống</span>
+      <h2>Danh sách yêu cầu đổi trả</h2>
+      <p>{{ total }} yêu cầu {{ hasActiveFilters ? 'phù hợp' : 'trong hệ thống' }}</p>
+    </div>
+
+    <!-- BỘ LỌC -->
+    <div class="filters">
+      <label class="search-box">
+        <ng-icon name="lucideSearch" size="17px"></ng-icon>
+        <input
+          type="search"
+          [(ngModel)]="searchKeyword"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Tìm mã yêu cầu, mã đơn hàng, tên khách hàng..."
+          aria-label="Tìm kiếm yêu cầu đổi trả"
+        />
+      </label>
+
+      <div class="filter-field">
+        <span>Trạng thái</span>
+        <select
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="onFilterChange()"
+          aria-label="Lọc theo trạng thái"
+        >
+          <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
       </div>
 
-      <!-- TOOLBAR: SEARCH & FILTERS -->
-      <div class="toolbar">
-        <div class="search-box">
-          <ng-icon name="lucideSearch" class="search-icon" size="18px"></ng-icon>
-          <input
-            type="text"
-            [(ngModel)]="searchKeyword"
-            (ngModelChange)="onSearchChange()"
-            placeholder="Tìm mã yêu cầu, mã đơn hàng, tên khách hàng..."
-            class="search-input"
-          />
-        </div>
+      <div class="filter-field">
+        <span>Thời gian</span>
+        <select
+          [(ngModel)]="selectedDateFilter"
+          (ngModelChange)="onFilterChange()"
+          aria-label="Lọc theo thời gian"
+        >
+          <option value="all">Tất cả thời gian</option>
+          <option value="today">Hôm nay</option>
+          <option value="7days">7 ngày qua</option>
+          <option value="30days">30 ngày qua</option>
+        </select>
+      </div>
 
-        <div class="filter-group">
-          <!-- Select Trạng thái -->
-          <div class="select-wrapper">
-            <select
-              [(ngModel)]="selectedStatus"
-              (ngModelChange)="onFilterChange()"
-              class="filter-select"
-            >
-              <option *ngFor="let opt of statusOptions" [value]="opt.value">
-                {{ opt.label }}
-              </option>
-            </select>
-            <ng-icon name="lucideChevronDown" class="select-icon" size="16px"></ng-icon>
-          </div>
+      <div class="filter-field">
+        <span>Lý do đổi trả</span>
+        <select
+          [(ngModel)]="selectedReason"
+          (ngModelChange)="onFilterChange()"
+          aria-label="Lọc theo lý do"
+        >
+          <option *ngFor="let opt of reasonOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
 
-          <!-- Select Ngày -->
-          <div class="select-wrapper">
-            <select
-              [(ngModel)]="selectedDateFilter"
-              (ngModelChange)="onFilterChange()"
-              class="filter-select"
-            >
-              <option value="all">Tất cả thời gian</option>
-              <option value="today">Hôm nay</option>
-              <option value="7days">7 ngày qua</option>
-              <option value="30days">30 ngày qua</option>
-            </select>
-            <ng-icon name="lucideChevronDown" class="select-icon" size="16px"></ng-icon>
-          </div>
-
-          <!-- Select Lý do đổi trả -->
-          <div class="select-wrapper">
-            <select
-              [(ngModel)]="selectedReason"
-              (ngModelChange)="onFilterChange()"
-              class="filter-select"
-            >
-              <option *ngFor="let opt of reasonOptions" [value]="opt.value">
-                {{ opt.label }}
-              </option>
-            </select>
-            <ng-icon name="lucideChevronDown" class="select-icon" size="16px"></ng-icon>
-          </div>
-        </div>
+      <div class="filter-actions" *ngIf="hasActiveFilters">
+        <button type="button" class="btn" (click)="clearFilters()">Xóa bộ lọc</button>
       </div>
     </div>
 
-    <!-- TABLE DANH SÁCH -->
-    <div class="table-container" [class.table-loading-overlay]="isLoading" *ngIf="returns.length > 0">
+    <!-- BẢNG YÊU CẦU ĐỔI TRẢ -->
+    <div class="table-wrapper">
       <table class="returns-table">
         <thead>
           <tr>
@@ -93,15 +86,17 @@
             <th>Thao tác</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody *ngIf="!isLoading && !errorMessage && returns.length">
           <tr *ngFor="let item of returns" [class.row-selected]="selectedReturn?.Return_order_id === item.Return_order_id">
             <!-- Mã yêu cầu -->
-            <td class="font-semibold text-primary clickable" (click)="openDetail(item)">
-              {{ item.Return_order_id }}
+            <td class="order-code">
+              <button type="button" class="link-button font-semibold" (click)="openDetail(item)">
+                {{ item.Return_order_id }}
+              </button>
             </td>
 
             <!-- Mã đơn hàng -->
-            <td class="font-medium text-slate-700">
+            <td class="order-code muted">
               {{ item.Order_id }}
             </td>
 
@@ -133,7 +128,7 @@
             </td>
 
             <!-- Ngày yêu cầu -->
-            <td class="text-slate-500 whitespace-nowrap">
+            <td class="muted whitespace-nowrap">
               {{ item.Created_at | date: 'dd/MM/yyyy' }}
             </td>
 
@@ -145,10 +140,10 @@
             </td>
 
             <!-- Thao tác -->
-            <td class="actions-cell">
+            <td class="actions">
               <button
                 type="button"
-                class="btn-link"
+                class="link-button"
                 (click)="openDetail(item)"
               >
                 Xem chi tiết
@@ -157,99 +152,67 @@
           </tr>
         </tbody>
       </table>
-    </div>
 
-    <!-- LOADING STATE (Chỉ hiện spinner toàn màn hình khi chưa có dữ liệu ban đầu) -->
-    <div class="table-loading" *ngIf="isLoading && returns.length === 0">
-      <div class="spinner"></div>
-      <p>Đang tải danh sách yêu cầu đổi trả...</p>
-    </div>
+      <!-- LOADING STATE -->
+      <div class="table-state" *ngIf="isLoading">Đang tải danh sách yêu cầu đổi trả...</div>
 
-    <!-- ERROR STATE -->
-    <div class="empty-state" *ngIf="!isLoading && errorMessage">
-      <div class="empty-icon-wrap" style="color: #ef4444; background: #fee2e2;">
-        <ng-icon name="lucideAlertCircle" size="40px"></ng-icon>
-      </div>
-      <h3 class="empty-title">Không thể tải dữ liệu</h3>
-      <p class="empty-desc" style="color: #b91c1c;">
-        {{ errorMessage }}
-      </p>
-      <div style="display: flex; gap: 10px; justify-content: center;">
-        <button type="button" class="btn-primary" (click)="loadReturns()">
-          <ng-icon name="lucideRefreshCw" size="16px" style="vertical-align: middle; margin-right: 4px;"></ng-icon>
-          Thử lại
+      <!-- ERROR STATE -->
+      <div class="table-state" *ngIf="!isLoading && errorMessage">
+        <ng-icon name="lucideAlertCircle" size="32px"></ng-icon>
+        <strong>Không tải được danh sách yêu cầu đổi trả</strong>
+        <p>{{ errorMessage }}</p>
+        <button type="button" class="btn" (click)="loadReturns()">
+          <ng-icon name="lucideRefreshCw" size="16px"></ng-icon>
+          <span>Tải lại</span>
         </button>
-        <a routerLink="/admin/login" class="btn-secondary" style="display: inline-flex; align-items: center; text-decoration: none;">
-          Đăng nhập lại
-        </a>
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div class="table-state" *ngIf="!isLoading && !errorMessage && !returns.length">
+        <ng-icon name="lucideInbox" size="32px"></ng-icon>
+        <strong>{{ hasActiveFilters ? 'Không tìm thấy yêu cầu phù hợp' : 'Chưa có yêu cầu đổi trả nào' }}</strong>
+        <p>{{ hasActiveFilters ? 'Không có yêu cầu đổi trả phù hợp với bộ lọc hiện tại. Thử thay đổi từ khóa, thời gian hoặc lý do.' : 'Hiện tại hệ thống chưa ghi nhận yêu cầu hoàn trả hàng nào từ khách hàng.' }}</p>
+        <button *ngIf="hasActiveFilters" type="button" class="btn" (click)="clearFilters()">Xóa bộ lọc</button>
       </div>
     </div>
 
-    <!-- EMPTY STATE -->
-    <div class="empty-state" *ngIf="!isLoading && !errorMessage && returns.length === 0">
-      <div class="empty-icon-wrap">
-        <ng-icon name="lucideInbox" size="48px" class="empty-icon"></ng-icon>
-      </div>
-      <h3 class="empty-title">
-        {{ hasActiveFilters ? 'Không tìm thấy yêu cầu phù hợp với bộ lọc' : 'Chưa có yêu cầu đổi trả nào' }}
-      </h3>
-      <p class="empty-desc">
-        {{ hasActiveFilters ? 'Thử thay đổi từ khóa, khoảng thời gian hoặc lý do để tìm kiếm.' : 'Hiện tại hệ thống chưa ghi nhận yêu cầu hoàn trả hàng nào từ khách hàng.' }}
-      </p>
-      <button *ngIf="hasActiveFilters" type="button" class="btn-secondary" (click)="clearFilters()">
-        Xóa bộ lọc
-      </button>
-    </div>
-
-    <!-- PAGINATION & FOOTER -->
-    <div class="card-footer" *ngIf="returns.length > 0">
-      <div class="pagination-info">
-        Hiển thị {{ (page - 1) * limit + 1 }}-{{ total < page * limit ? total : page * limit }} / {{ total }} yêu cầu
+    <!-- PHÂN TRANG (ĐỒNG BỘ VỚI XỬ LÝ ĐƠN HÀNG & DANH MỤC SẢN PHẨM) -->
+    <footer class="table-footer" *ngIf="!isLoading && !errorMessage">
+      <div class="pagination-summary">
+        Hiển thị <strong>{{ rangeStart }}</strong>–<strong>{{ rangeEnd }}</strong> trong tổng số <strong>{{ total }}</strong> bản ghi
       </div>
 
       <div class="pagination-controls">
-        <div class="limit-selector">
-          <span>Số dòng mỗi trang</span>
-          <select [(ngModel)]="limit" (ngModelChange)="onLimitChange()" class="limit-select">
-            <option [ngValue]="10">10 dòng</option>
-            <option [ngValue]="20">20 dòng</option>
-            <option [ngValue]="50">50 dòng</option>
+        <label class="page-size">
+          <span>Số dòng:</span>
+          <select [(ngModel)]="limit" (ngModelChange)="onLimitChange()" aria-label="Số dòng mỗi trang">
+            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
           </select>
-        </div>
+        </label>
 
-        <nav class="pagination-pages" aria-label="Phân trang">
-          <button
-            type="button"
-            class="page-btn"
-            [disabled]="page === 1"
-            (click)="onPageChange(page - 1)"
-            aria-label="Trang trước"
-          >
-            <ng-icon name="lucideChevronLeft" size="16px"></ng-icon>
-          </button>
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="page <= 1 || isLoading || total === 0"
+          (click)="goToPage(page - 1)"
+          aria-label="Trang trước"
+        >
+          ‹
+        </button>
 
-          <button
-            *ngFor="let p of pagesArray"
-            type="button"
-            class="page-btn"
-            [class.active]="p === page"
-            (click)="onPageChange(p)"
-          >
-            {{ p }}
-          </button>
+        <span class="current-page">{{ totalPages > 0 ? page : 0 }} / {{ totalPages }}</span>
 
-          <button
-            type="button"
-            class="page-btn"
-            [disabled]="page === totalPages"
-            (click)="onPageChange(page + 1)"
-            aria-label="Trang sau"
-          >
-            <ng-icon name="lucideChevronRight" size="16px"></ng-icon>
-          </button>
-        </nav>
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="page >= totalPages || isLoading || total === 0"
+          (click)="goToPage(page + 1)"
+          aria-label="Trang sau"
+        >
+          ›
+        </button>
       </div>
-    </div>
+    </footer>
 
     <!-- GHI CHÚ DƯỚI BẢNG THEO FIGMA -->
     <div class="footer-note" *ngIf="role === 'Staff'">
