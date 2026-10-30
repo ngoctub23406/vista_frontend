@@ -34,6 +34,7 @@ import { AdminDashboard } from './admin/pages/admin-dashboard/admin-dashboard';
 import { AdminChangePassword } from './admin/pages/admin-change-password/admin-change-password';
 import { AdminOrders } from './admin/pages/admin-orders/admin-orders';
 import { AdminProducts } from './admin/pages/admin-products/admin-products/admin-products';
+import { AdminReturnsComponent } from './admin/pages/admin-returns/admin-returns';
 
 export const routes: Routes = [
   // =========================
@@ -79,6 +80,10 @@ export const routes: Routes = [
       {
         path: 'products',
         component: AdminProducts,
+      },
+      {
+        path: 'returns',
+        component: AdminReturnsComponent,
       },
     ],
   },
