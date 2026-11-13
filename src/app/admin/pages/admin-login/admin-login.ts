@@ -5,6 +5,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 interface LoginResponse {
   success: boolean;
@@ -33,7 +34,7 @@ export class AdminLogin {
   errorMessage = '';
   isLoading = false;
 
-  private readonly apiUrl = 'http://localhost:5000/api/auth/login';
+  private readonly apiUrl = `${environment.apiUrl}/auth/login`;
 
   constructor(
     private http: HttpClient,
