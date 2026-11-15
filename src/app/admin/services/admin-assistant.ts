@@ -31,6 +31,7 @@ export interface AssistantChatResponse {
   intent: AssistantIntent;
   answer: string;
   data_available: boolean;
+  suggested_prompts?: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -99,7 +100,8 @@ export class AdminAssistantService {
             role: d.context?.role || d.role || 'Staff',
             intent: d.intent || 'unsupported',
             answer: d.message || d.answer || '',
-            data_available: d.context ? d.context.data_available !== false : true
+            data_available: d.context ? d.context.data_available !== false : true,
+            suggested_prompts: Array.isArray(d.suggested_prompts) ? d.suggested_prompts : []
           } as AssistantChatResponse;
         }),
         catchError((error: HttpErrorResponse | Error) => {

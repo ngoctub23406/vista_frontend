@@ -357,18 +357,48 @@ describe('VISTA AI Management Assistant - Frontend Unit Tests', () => {
       expect(comp.isLoading).toBe(false);
     });
 
-    it('2.7 – clearChat() làm sạch lịch sử hội thoại trong phiên', () => {
+    it('2.7 – clearChat() làm sạch lịch sử hội thoại trong phiên và reset gợi ý động', () => {
       const comp = createComponentWithMockService({});
       comp.messages = [
         { id: '1', role: 'user', content: 'Xin chào', time: '10:00' },
         { id: '2', role: 'assistant', content: 'Chào bạn', time: '10:01' }
       ];
       comp.errorMessage = 'Có lỗi';
+      comp.dynamicFollowUpPrompts = ['Gợi ý câu tiếp'];
 
       comp.clearChat();
 
       expect(comp.messages.length).toBe(0);
       expect(comp.errorMessage).toBeNull();
+      expect(comp.dynamicFollowUpPrompts.length).toBe(0);
+    });
+
+    it('2.7b – Khi trợ lý phản hồi kèm suggested_prompts, cập nhật dynamicFollowUpPrompts và currentPrompts', () => {
+      const mockResponse: AssistantChatResponse = {
+        status: 'answered',
+        role: 'Manager',
+        intent: 'financial_kpi',
+        answer: 'Doanh thu tháng này đạt 1,34 tỷ đồng.',
+        data_available: true,
+        suggested_prompts: [
+          'Có bao nhiêu đơn quá hạn cần xử lý ngay?',
+          'Lý do hủy đơn nhiều nhất gần đây?',
+          'Các chương trình khuyến mãi nào đang chạy?'
+        ]
+      };
+
+      const mockService = {
+        sendMessage: vi.fn().mockReturnValue(of(mockResponse))
+      };
+
+      const comp = createComponentWithMockService(mockService);
+      comp.inputMessage = 'Làm sao để tăng doanh thu đây';
+      comp.sendMessage();
+
+      expect(comp.dynamicFollowUpPrompts.length).toBe(3);
+      expect(comp.dynamicFollowUpPrompts[0]).toBe('Có bao nhiêu đơn quá hạn cần xử lý ngay?');
+      expect(comp.currentPrompts).toEqual(mockResponse.suggested_prompts);
+      expect(comp.messages[1].suggestedPrompts).toEqual(mockResponse.suggested_prompts);
     });
 
     it('2.8 – onKeyDown() chỉ gửi tin khi bấm Enter, không gửi khi Shift+Enter', () => {

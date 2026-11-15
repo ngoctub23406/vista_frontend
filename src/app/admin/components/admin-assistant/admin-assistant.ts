@@ -42,6 +42,7 @@ export interface ChatMessage {
   status?: AssistantStatus;
   intent?: AssistantIntent;
   isError?: boolean;
+  suggestedPrompts?: string[];
 }
 
 @Component({
@@ -144,7 +145,13 @@ export class AdminAssistantComponent implements OnInit, OnDestroy, AfterViewChec
     'Quy trình xử lý đơn quá hạn?'
   ];
 
+  // Gợi ý câu hỏi tiếp theo được sinh động theo ngữ cảnh hội thoại
+  dynamicFollowUpPrompts: string[] = [];
+
   get currentPrompts(): string[] {
+    if (this.messages.length > 0 && this.dynamicFollowUpPrompts.length > 0) {
+      return this.dynamicFollowUpPrompts;
+    }
     return this.role === 'Manager' ? this.managerPrompts : this.staffPrompts;
   }
 
@@ -368,13 +375,20 @@ export class AdminAssistantComponent implements OnInit, OnDestroy, AfterViewChec
           const resTime = new Date();
           const resTimeString = `${resTime.getHours().toString().padStart(2, '0')}:${resTime.getMinutes().toString().padStart(2, '0')}`;
 
+          const followUps = Array.isArray(res.suggested_prompts) && res.suggested_prompts.length > 0
+            ? res.suggested_prompts
+            : [];
+
+          this.dynamicFollowUpPrompts = followUps;
+
           const assistantMsg: ChatMessage = {
             id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
             role: 'assistant',
             content: res.answer || 'Tôi đã xử lý yêu cầu của bạn.',
             time: resTimeString,
             status: res.status,
-            intent: res.intent
+            intent: res.intent,
+            suggestedPrompts: followUps
           };
 
           this.messages.push(assistantMsg);
@@ -448,7 +462,17 @@ export class AdminAssistantComponent implements OnInit, OnDestroy, AfterViewChec
   clearChat(): void {
     this.messages = [];
     this.errorMessage = null;
+    this.dynamicFollowUpPrompts = [];
     this.refreshRole();
+  }
+
+  isLatestAssistant(msg: ChatMessage): boolean {
+    for (let i = this.messages.length - 1; i >= 0; i--) {
+      if (this.messages[i].role === 'assistant') {
+        return this.messages[i].id === msg.id;
+      }
+    }
+    return false;
   }
 
   private scrollToBottomImmediate(): void {

@@ -209,6 +209,27 @@
           <div class="msg-bubble">
             <div class="msg-text" [innerHTML]="formatMessage(msg.content)"></div>
           </div>
+
+          <!-- Follow-up chips gắn trực tiếp bên dưới câu trả lời của trợ lý -->
+          <div
+            *ngIf="msg.role === 'assistant' && msg.suggestedPrompts && msg.suggestedPrompts.length > 0 && isLatestAssistant(msg) && !isLoading"
+            class="msg-followup-container"
+          >
+            <div class="followup-header">
+              <ng-icon name="lucideSparkles" [size]="'13px'"></ng-icon>
+              <span>Gợi ý câu hỏi tiếp theo:</span>
+            </div>
+            <div class="followup-pills-list">
+              <button
+                *ngFor="let prompt of msg.suggestedPrompts"
+                type="button"
+                class="followup-chip"
+                (click)="selectPrompt(prompt)"
+              >
+                {{ prompt }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -233,7 +254,11 @@
   </div>
 
   <!-- Quick Prompts bar (when conversation already has messages) -->
-  <div *ngIf="messages.length > 0 && !isLoading" class="inline-pills-bar">
+  <div *ngIf="messages.length > 0 && !isLoading && currentPrompts.length > 0" class="inline-pills-bar">
+    <div class="inline-pills-label">
+      <ng-icon name="lucideSparkles" [size]="'12px'"></ng-icon>
+      <span>{{ dynamicFollowUpPrompts.length > 0 ? 'Gợi ý tiếp theo:' : 'Gợi ý nhanh:' }}</span>
+    </div>
     <button
       *ngFor="let prompt of currentPrompts.slice(0, 3)"
       type="button"
