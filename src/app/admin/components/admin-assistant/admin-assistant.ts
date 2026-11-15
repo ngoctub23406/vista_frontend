@@ -129,6 +129,7 @@ export class AdminAssistantComponent implements OnInit, OnDestroy, AfterViewChec
     'Lợi nhuận gộp tháng này?',
     'Tình hình giá vốn?',
     'Có bao nhiêu đơn quá hạn?',
+    'Lý do hủy đơn nhiều nhất?',
     'Tình hình đổi trả?',
     'Đánh giá nào cần kiểm duyệt?'
   ];
@@ -137,6 +138,7 @@ export class AdminAssistantComponent implements OnInit, OnDestroy, AfterViewChec
   readonly staffPrompts: string[] = [
     'Có bao nhiêu đơn quá hạn?',
     'Đơn nào đang chờ xác nhận?',
+    'Lý do hủy đơn nhiều nhất?',
     'Tình hình đổi trả?',
     'Có đánh giá nào cần kiểm duyệt?',
     'Quy trình xử lý đơn quá hạn?'
