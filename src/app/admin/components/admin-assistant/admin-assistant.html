@@ -253,11 +253,11 @@
     </div>
   </div>
 
-  <!-- Quick Prompts bar (when conversation already has messages) -->
-  <div *ngIf="messages.length > 0 && !isLoading && currentPrompts.length > 0" class="inline-pills-bar">
+  <!-- Quick Prompts bar (chỉ hiển thị dự phòng khi KHÔNG có gợi ý theo ngữ cảnh ở trên) -->
+  <div *ngIf="messages.length > 0 && !isLoading && dynamicFollowUpPrompts.length === 0 && currentPrompts.length > 0" class="inline-pills-bar">
     <div class="inline-pills-label">
       <ng-icon name="lucideSparkles" [size]="'12px'"></ng-icon>
-      <span>{{ dynamicFollowUpPrompts.length > 0 ? 'Gợi ý tiếp theo:' : 'Gợi ý nhanh:' }}</span>
+      <span>Gợi ý nhanh:</span>
     </div>
     <button
       *ngFor="let prompt of currentPrompts.slice(0, 3)"

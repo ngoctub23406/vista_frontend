@@ -375,9 +375,16 @@ export class AdminAssistantComponent implements OnInit, OnDestroy, AfterViewChec
           const resTime = new Date();
           const resTimeString = `${resTime.getHours().toString().padStart(2, '0')}:${resTime.getMinutes().toString().padStart(2, '0')}`;
 
-          const followUps = Array.isArray(res.suggested_prompts) && res.suggested_prompts.length > 0
-            ? res.suggested_prompts
-            : [];
+          const followUps = (
+            Array.isArray(res.suggested_prompts) ? res.suggested_prompts : []
+          )
+            .map((p) =>
+              String(p || '')
+                .replace(/^[-•*\d\.\s:]+/, '')
+                .replace(/[\s\.:]+$/, '')
+                .trim()
+            )
+            .filter((p) => p.length > 0);
 
           this.dynamicFollowUpPrompts = followUps;
 
