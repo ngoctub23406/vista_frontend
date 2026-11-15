@@ -101,7 +101,16 @@ export class AdminAssistantService {
             intent: d.intent || 'unsupported',
             answer: d.message || d.answer || '',
             data_available: d.context ? d.context.data_available !== false : true,
-            suggested_prompts: Array.isArray(d.suggested_prompts) ? d.suggested_prompts : []
+            suggested_prompts: Array.isArray(d.suggested_prompts)
+              ? d.suggested_prompts
+                  .map((p: any) =>
+                    String(p || '')
+                      .replace(/^[-•*\d\.\s:]+/, '')
+                      .replace(/[\s\.:]+$/, '')
+                      .trim()
+                  )
+                  .filter((p: string) => p.length > 0)
+              : []
           } as AssistantChatResponse;
         }),
         catchError((error: HttpErrorResponse | Error) => {
