@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ComparePage } from './compare-page';
+import { ComparePageComponent } from './compare-page';
 
 describe('ComparePage', () => {
-  let component: ComparePage;
-  let fixture: ComponentFixture<ComparePage>;
+  let component: ComparePageComponent;
+  let fixture: ComponentFixture<ComparePageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ComparePage],
+      imports: [ComparePageComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ComparePage);
+    fixture = TestBed.createComponent(ComparePageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -20,3 +20,4 @@ describe('ComparePage', () => {
     expect(component).toBeTruthy();
   });
 });
+

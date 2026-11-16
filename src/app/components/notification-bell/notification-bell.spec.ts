@@ -374,7 +374,7 @@ describe('VISTA Operational Notification System - Frontend Integration (Stage 2.
     it('B6 – Realtime phát subject incoming$ để kích hoạt Toast thông báo', () => {
       const { service } = createMockService();
       let emittedNotification: AppNotification | null = null;
-      service.incoming$.subscribe((item) => {
+      service.incoming$.subscribe((item: any) => {
         emittedNotification = item;
       });
 
@@ -462,7 +462,7 @@ describe('VISTA Operational Notification System - Frontend Integration (Stage 2.
       service.markAsRead(unreadSentItem);
 
       // isRead phải chuyển thành true, nhưng status vẫn giữ nguyên 'sent' (chưa tiếp nhận)
-      const updated = service.items$.value.find((i) => i.id === 'notif_independent_1');
+      const updated = service.items$.value.find((i: any) => i.id === 'notif_independent_1');
       expect(updated?.isRead).toBe(true);
       expect(updated?.status).toBe('sent');
       expect(service.unreadCount$.value).toBe(0);

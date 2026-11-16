@@ -27,7 +27,7 @@ export class Wishlist implements OnInit, OnDestroy {
   loadError = false;
   isLoggedIn = false;
 
-  private shownKey = '';
+  private shownKey: string | null = null;
   private subscriptions = new Subscription();
 
   constructor(
@@ -64,7 +64,7 @@ export class Wishlist implements OnInit, OnDestroy {
   }
 
   retry(): void {
-    this.shownKey = '';
+    this.shownKey = null;
     this.load(this.wishlistService.getEntries().map((entry) => entry.productId));
   }
 
