@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { AdminForgotPassword } from './admin-forgot-password';
 
@@ -9,6 +10,7 @@ describe('AdminForgotPassword', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AdminForgotPassword],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AdminForgotPassword);
@@ -20,3 +22,4 @@ describe('AdminForgotPassword', () => {
     expect(component).toBeTruthy();
   });
 });
+

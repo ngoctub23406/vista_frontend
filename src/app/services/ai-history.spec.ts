@@ -1,16 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AiHistory } from './ai-history';
+import { AiHistoryService } from './ai-history';
 
-describe('AiHistory', () => {
-  let service: AiHistory;
+describe('AiHistoryService', () => {
+  let service: AiHistoryService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(AiHistory);
+    service = TestBed.inject(AiHistoryService);
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 });
+

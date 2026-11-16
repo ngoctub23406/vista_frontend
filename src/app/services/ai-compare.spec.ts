@@ -1,16 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AiCompare } from './ai-compare';
+import { AiCompareService } from './ai-compare';
 
-describe('AiCompare', () => {
-  let service: AiCompare;
+describe('AiCompareService', () => {
+  let service: AiCompareService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(AiCompare);
+    service = TestBed.inject(AiCompareService);
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 });
+
